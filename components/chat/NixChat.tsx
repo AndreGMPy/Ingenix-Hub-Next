@@ -6,7 +6,17 @@ import { ArrowUp, MessageCircle, X } from "lucide-react";
 import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { whatsappNumber } from "@/data/site";
 
-type ChatMessage = { role: "user" | "model"; text: string; error?: boolean };
+type ChatMessage = {
+  id: string;
+  role: "user" | "model";
+  text: string;
+  error?: boolean;
+  sendFailed?: boolean;
+};
+
+const MAX_HISTORY_TURNS = 6;
+const MAX_STORED_MESSAGE_CHARS = 1_200;
+const CLIENT_TIMEOUT_MS = 45_000;
 
 const quickPrompts = [
   ["Página web", "Quiero una página web para mi negocio"],
@@ -17,11 +27,37 @@ const quickPrompts = [
 
 const welcome = "Hola, soy Nix 👋 La IA de Ingenix Hub. Cuéntame qué quieres crear y te ayudaré a definir la opción más conveniente para tu proyecto.";
 
+function createMessageId() {
+  return typeof crypto !== "undefined" && "randomUUID" in crypto
+    ? crypto.randomUUID()
+    : `nix-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
+function limitToRecentTurns(messages: ChatMessage[], maxTurns = MAX_HISTORY_TURNS) {
+  const turns: ChatMessage[][] = [];
+
+  for (const message of messages) {
+    if (message.error || message.sendFailed) continue;
+    if (message.role === "user") {
+      turns.push([message]);
+      continue;
+    }
+
+    const currentTurn = turns.at(-1);
+    if (currentTurn?.length === 1 && currentTurn[0].role === "user") currentTurn.push(message);
+  }
+
+  return turns.slice(-maxTurns).flat();
+}
+
 function readHistory(): ChatMessage[] {
   try {
     const parsed = JSON.parse(sessionStorage.getItem("nix-chat-history") || "[]") as unknown;
     if (!Array.isArray(parsed)) return [];
-    return parsed.filter((item): item is ChatMessage => Boolean(item) && (item.role === "user" || item.role === "model") && typeof item.text === "string").slice(-12);
+    const messages = parsed
+      .filter((item): item is Omit<ChatMessage, "id"> => Boolean(item) && (item.role === "user" || item.role === "model") && typeof item.text === "string" && item.text.trim().length > 0 && item.text.length <= MAX_STORED_MESSAGE_CHARS)
+      .map((item) => ({ id: createMessageId(), role: item.role, text: item.text.trim() }));
+    return limitToRecentTurns(messages);
   } catch { return []; }
 }
 
@@ -40,6 +76,8 @@ export function NixChat({ floatHref }: { floatHref: string }) {
   const triggerRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLElement>(null);
   const scrollRef = useRef(0);
+  const isSendingRef = useRef(false);
+  const activeRequestRef = useRef<{ controller: AbortController; timeoutId: number } | null>(null);
 
   const close = useCallback(() => {
     setOpen(false);
@@ -67,7 +105,8 @@ export function NixChat({ floatHref }: { floatHref: string }) {
   }, []);
   useEffect(() => {
     if (!hydrated) return;
-    try { sessionStorage.setItem("nix-chat-history", JSON.stringify(history.filter(message => !message.error).slice(-12))); } catch {}
+    const persistableHistory = limitToRecentTurns(history).map(({ role, text }) => ({ role, text }));
+    try { sessionStorage.setItem("nix-chat-history", JSON.stringify(persistableHistory)); } catch {}
   }, [history, hydrated]);
   useEffect(() => { messagesRef.current?.scrollTo({ top: messagesRef.current.scrollHeight, behavior: reduceMotion ? "auto" : "smooth" }); }, [history, busy, open, reduceMotion]);
 
@@ -124,6 +163,14 @@ export function NixChat({ floatHref }: { floatHref: string }) {
     Object.assign(document.body.style, { position: "", top: "", left: "", right: "", width: "", overflow: "" });
   }, []);
 
+  useEffect(() => () => {
+    const activeRequest = activeRequestRef.current;
+    if (!activeRequest) return;
+    window.clearTimeout(activeRequest.timeoutId);
+    activeRequest.controller.abort();
+    activeRequestRef.current = null;
+  }, []);
+
   const whatsappHref = useMemo(() => {
     const userMessages = history.filter(message => message.role === "user" && !message.error).slice(-4).map(message => `• ${message.text.replace(/\s+/g, " ").trim()}`);
     const summary = userMessages.length
@@ -138,27 +185,46 @@ export function NixChat({ floatHref }: { floatHref: string }) {
   };
 
   async function askNix(raw: string) {
-    const clean = raw.trim().slice(0, 800);
-    if (!clean || busy) return;
-    const userMessage: ChatMessage = { role: "user", text: clean };
-    const requestHistory = [...history.filter(message => !message.error), userMessage].slice(-12);
+    const clean = raw.trim();
+    if (!clean || isSendingRef.current) return;
+    const userMessage: ChatMessage = { id: createMessageId(), role: "user", text: clean };
+    const requestHistory = [...limitToRecentTurns(history, MAX_HISTORY_TURNS - 1), userMessage];
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => controller.abort(), CLIENT_TIMEOUT_MS);
+
+    isSendingRef.current = true;
+    activeRequestRef.current = { controller, timeoutId };
     setHistory(requestHistory);
     setInput("");
     if (inputRef.current) { inputRef.current.style.height = "auto"; }
     setBusy(true);
     try {
-      const response = await fetch("/api/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ messages: requestHistory }) });
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: requestHistory.map(({ role, text }) => ({ role, text })) }),
+        signal: controller.signal,
+      });
       const payload = await response.json().catch(() => ({})) as { reply?: string; error?: string };
       if (!response.ok) throw new Error(payload.error || "No pude conectar con la IA en este momento.");
       const answer = String(payload.reply || "").trim();
       if (!answer) throw new Error("La IA no devolvió una respuesta. Intenta de nuevo.");
-      const botMessage: ChatMessage = { role: "model", text: answer };
-      setHistory(current => [...current.filter(message => !message.error), botMessage].slice(-12));
+      const botMessage: ChatMessage = { id: createMessageId(), role: "model", text: answer };
+      setHistory((current) => limitToRecentTurns([...current.filter((message) => !message.error && !message.sendFailed), botMessage]));
     } catch (error) {
-      const message = error instanceof Error ? error.message : "No pude responder ahora. Puedes continuar por WhatsApp.";
-      const errorMessage: ChatMessage = { role: "model", text: message, error: true };
-      setHistory(current => [...current, errorMessage]);
+      const timedOut = error instanceof DOMException && error.name === "AbortError";
+      const message = timedOut
+        ? "Nix tardó más de 45 segundos en responder. Intenta nuevamente."
+        : error instanceof Error ? error.message : "No pude responder ahora. Puedes continuar por WhatsApp.";
+      const errorMessage: ChatMessage = { id: createMessageId(), role: "model", text: message, error: true };
+      setHistory((current) => [
+        ...current.map((message) => message.id === userMessage.id ? { ...message, sendFailed: true } : message),
+        errorMessage,
+      ]);
     } finally {
+      window.clearTimeout(timeoutId);
+      if (activeRequestRef.current?.controller === controller) activeRequestRef.current = null;
+      isSendingRef.current = false;
       setBusy(false);
       window.setTimeout(() => inputRef.current?.focus({ preventScroll: true }), 0);
     }
@@ -196,9 +262,9 @@ export function NixChat({ floatHref }: { floatHref: string }) {
         </header>
         <div className="nix-chat-intro">Puedo orientarte sobre páginas web, catálogos, apps, paneles y automatizaciones con IA.</div>
         <div ref={messagesRef} className="nix-chat-messages" aria-live="polite" aria-label="Conversación con Nix">
-          {history.length === 0 && <ChatBubble message={{ role: "model", text: welcome }} />}
-          {history.map((message, index) => <ChatBubble key={`${message.role}-${index}-${message.text.slice(0, 12)}`} message={message} />)}
-          {busy && <div className="nix-message bot nix-typing"><span className="nix-message-avatar" aria-hidden="true"><Image src="/mascota-ingenix/mascota-final.webp" alt="" width={32} height={32} /></span><span className="nix-message-bubble" aria-label="Nix está escribiendo"><i className="nix-typing-dot" /><i className="nix-typing-dot" /><i className="nix-typing-dot" /></span></div>}
+          {history.length === 0 && <ChatBubble message={{ id: "welcome", role: "model", text: welcome }} />}
+          {history.map((message) => <ChatBubble key={message.id} message={message} />)}
+          {busy && <div className="nix-message bot nix-typing"><span className="nix-message-avatar" aria-hidden="true"><Image src="/mascota-ingenix/mascota-final.webp" alt="" width={32} height={32} /></span><span className="nix-message-bubble" aria-label="Nix está escribiendo"><span className="nix-typing-label">Nix está escribiendo…</span><i className="nix-typing-dot" /><i className="nix-typing-dot" /><i className="nix-typing-dot" /></span></div>}
         </div>
         <div className="nix-chat-quick" aria-label="Preguntas rápidas">
           {quickPrompts.map(([label, prompt]) => <button key={label} type="button" disabled={busy} onClick={() => void askNix(prompt)}>{label}</button>)}

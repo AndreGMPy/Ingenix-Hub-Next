@@ -20,6 +20,8 @@ body.nix-chat-open .mascot-dock { opacity: 0; visibility: hidden; pointer-events
   font-size: 1.55rem;
 }
 .nix-chat-form textarea { min-height: 41px; }
+.nix-message-bubble { white-space: pre-wrap; overflow-wrap: break-word; word-break: normal; }
+.nix-typing-label { margin-right: 3px; white-space: normal; }
 .calendar-frame { width: 100%; min-height: 650px; border: 0; background: transparent; }
 
 @media (max-width: 700px) {

@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import { useReducedMotion } from "motion/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 const messages = [
@@ -12,12 +11,16 @@ const messages = [
   ["Sistema listo.", 100],
 ] as const;
 
+const INTRO_DURATION_MS = 3_200;
+const REDUCED_MOTION_DURATION_MS = 160;
+const SAFETY_TIMEOUT_MS = 5_000;
+
 type IntroLoaderProps = { onComplete?: () => void };
 
 export function IntroLoader({ onComplete }: IntroLoaderProps) {
-  const reduceMotion = useReducedMotion();
   const [step, setStep] = useState(0);
   const [visible, setVisible] = useState(true);
+  const [reduceMotion, setReduceMotion] = useState(false);
   const completedRef = useRef(false);
   const frameRef = useRef<number | null>(null);
   const completionTimerRef = useRef<number | null>(null);
@@ -32,45 +35,88 @@ export function IntroLoader({ onComplete }: IntroLoaderProps) {
     safetyTimerRef.current = null;
   }, []);
 
-  const complete = useCallback(() => {
+  const finishIntro = useCallback(() => {
     if (completedRef.current) return;
     completedRef.current = true;
     clearScheduledWork();
     document.documentElement.classList.remove("intro-active");
-    try { onComplete?.(); } catch {}
     setVisible(false);
+    onComplete?.();
   }, [clearScheduledWork, onComplete]);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia?.("(prefers-reduced-motion: reduce)");
+    if (!mediaQuery) return;
+
+    const updateMotionPreference = () => setReduceMotion(mediaQuery.matches);
+    updateMotionPreference();
+    mediaQuery.addEventListener("change", updateMotionPreference);
+
+    return () => mediaQuery.removeEventListener("change", updateMotionPreference);
+  }, []);
 
   useEffect(() => {
     completedRef.current = false;
     document.documentElement.classList.add("intro-active");
-    const duration = reduceMotion ? 160 : 3200;
-    const startedAt = performance.now();
-    let cancelled = false;
 
-    const update = (now: number) => {
-      try {
-        if (cancelled || completedRef.current) return;
-        const progress = Math.min(1, (now - startedAt) / duration);
-        const nextStep = Math.min(messages.length - 1, Math.floor(progress * messages.length));
-        setStep(current => current === nextStep ? current : nextStep);
-        if (progress < 1) frameRef.current = window.requestAnimationFrame(update);
-      } catch {}
+    let active = true;
+    const duration = reduceMotion ? REDUCED_MOTION_DURATION_MS : INTRO_DURATION_MS;
+    const startedAt = performance.now();
+    const finishIfActive = () => {
+      if (active) finishIntro();
     };
 
-    completionTimerRef.current = window.setTimeout(complete, duration);
-    safetyTimerRef.current = window.setTimeout(complete, 5000);
-    try { frameRef.current = window.requestAnimationFrame(update); } catch {}
+    completionTimerRef.current = window.setTimeout(finishIfActive, duration);
+    safetyTimerRef.current = window.setTimeout(finishIfActive, SAFETY_TIMEOUT_MS);
+
+    if (reduceMotion || typeof window.requestAnimationFrame !== "function") {
+      if (typeof window.requestAnimationFrame !== "function") finishIfActive();
+      return () => {
+        active = false;
+        clearScheduledWork();
+        document.documentElement.classList.remove("intro-active");
+      };
+    }
+
+    const update = (now: number) => {
+      if (!active || completedRef.current) return;
+
+      const progress = Math.min(1, Math.max(0, (now - startedAt) / duration));
+      const nextStep = Math.min(messages.length - 1, Math.floor(progress * messages.length));
+      setStep((current) => current === nextStep ? current : nextStep);
+
+      if (progress >= 1) {
+        finishIfActive();
+        return;
+      }
+
+      try {
+        frameRef.current = window.requestAnimationFrame(update);
+      } catch (error) {
+        console.error("Intro animation failed:", error);
+        finishIfActive();
+      }
+    };
+
+    try {
+      frameRef.current = window.requestAnimationFrame(update);
+    } catch (error) {
+      console.error("Intro animation failed:", error);
+      finishIfActive();
+    }
 
     return () => {
-      cancelled = true;
+      active = false;
       clearScheduledWork();
       document.documentElement.classList.remove("intro-active");
     };
-  }, [clearScheduledWork, complete, reduceMotion]);
+  }, [clearScheduledWork, finishIntro, reduceMotion]);
 
   if (!visible) return null;
-  const [line, percent] = messages[step];
+
+  const activeMessage = messages[step] ?? messages[0];
+  const line = activeMessage[0];
+  const percent = activeMessage[1];
 
   return (
     <div className="intro-loader" role="status" aria-live="polite" aria-label="Cargando Ingenix Hub">
@@ -84,7 +130,7 @@ export function IntroLoader({ onComplete }: IntroLoaderProps) {
           <p><span className="boot-prefix">&gt;</span> <span>{line}</span><i className="typing-cursor" /></p>
           <div className="boot-status-row"><div className="matrix-loader" aria-hidden="true">{Array.from({ length: 9 }, (_, index) => <span key={index} />)}</div><small>{String(percent).padStart(2, "0")}%</small></div>
           <div className="boot-track" aria-hidden="true"><span style={{ width: `${percent}%` }} /></div>
-          <button className="skip-intro" type="button" onClick={complete}>Saltar intro</button>
+          <button className="skip-intro" type="button" onClick={finishIntro}>Saltar intro</button>
         </div>
       </div>
     </div>
