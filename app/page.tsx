@@ -1,4 +1,4 @@
-import { BriefcaseBusiness, CalendarCheck, Camera, Gauge, Layers3, Mail, MessageCircle, Monitor, Share2, Smartphone } from "lucide-react";
+import { CalendarCheck, Camera, Gauge, Layers3, Mail, MessageCircle, Monitor, Share2, Smartphone } from "lucide-react";
 import { ExperienceLab } from "@/components/home/ExperienceLab";
 import { HeroExperience } from "@/components/home/HeroExperience";
 import { IntroLoader } from "@/components/home/IntroLoader";
@@ -60,14 +60,13 @@ export default function HomePage() {
         </div></section>
 
         <section className="section contact-section" id="contact"><div className="container">
-          <div className="section-heading" data-reveal><span className="section-pill">Contacto</span><h2>Hablemos de tu proyecto</h2><p>Envíame tu idea por WhatsApp o agenda una llamada. Te ayudo a aterrizarla aunque todavía no sepas exactamente qué pedir.</p></div>
+          <div className="section-heading" data-reveal><span className="section-pill">Contacto</span><h2>Hablemos de tu proyecto</h2><p>Compártenos tu idea por WhatsApp o agenda una llamada. En Ingenix Hub te ayudamos a aterrizarla, aunque todavía no sepas exactamente qué pedir.</p></div>
           <div className="contact-grid">
             <div className="contact-card" data-reveal>
-              <a className="contact-row" href={links.contact} target="_blank" rel="noopener noreferrer"><MessageCircle aria-hidden="true" /><span><strong>WhatsApp</strong><small>+52 445 182 0808</small></span></a>
+              <a className="contact-row" href={links.contact} target="_blank" rel="noopener noreferrer"><MessageCircle aria-hidden="true" /><span><strong>WhatsApp</strong><small>+52 493 263 6339</small></span></a>
               <a className="contact-row" href={links.email}><Mail aria-hidden="true" /><span><strong>Correo</strong><small>ingenixhub@gmail.com</small></span></a>
               <a className="contact-row" href={links.instagram} target="_blank" rel="noopener noreferrer"><Camera aria-hidden="true" /><span><strong>Instagram</strong><small>@ingenixhub</small></span></a>
               <a className="contact-row" href={links.facebook} target="_blank" rel="noopener noreferrer"><Share2 aria-hidden="true" /><span><strong>Facebook</strong><small>Ingenix Hub</small></span></a>
-              <a className="contact-row" href={links.linkedin} target="_blank" rel="noopener noreferrer"><BriefcaseBusiness aria-hidden="true" /><span><strong>LinkedIn</strong><small>Brandon André Gordillo Moreno</small></span></a>
             </div>
             <div className="calendar-card" data-reveal><div className="calendar-placeholder"><div className="calendar-matrix" aria-hidden="true">{Array.from({ length: 9 }, (_, index) => <span key={index} />)}</div><strong>Agenda una llamada de diagnóstico</strong><p>Si el calendario tarda en cargar, puedes abrir Calendly directamente.</p><a className="btn btn-ghost" href={links.calendly} target="_blank" rel="noopener noreferrer">Abrir Calendly</a></div><iframe className="calendly-inline-widget calendar-frame" title="Agenda una llamada con Ingenix Hub" src={`${links.calendly}?hide_gdpr_banner=1`} loading="lazy" /></div>
           </div>

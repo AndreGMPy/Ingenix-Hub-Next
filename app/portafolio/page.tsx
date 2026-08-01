@@ -31,7 +31,7 @@ export default function PortfolioPage() {
         <section className="section portfolio-list-section"><div className="container portfolio-grid-page">
           {projects.map(project => <article className="portfolio-page-card tilt-card scan-card" data-reveal key={project.title}>
             <div className="browser-mockup"><div className="browser-bar"><span /><span /><span /><small>{project.browser}</small></div><Image src={project.image} alt={project.alt} width={1850} height={880} sizes="(max-width: 700px) 92vw, 46vw" /></div>
-            <div className="project-info"><small>{project.type}</small><h3>{project.title}</h3><p>{project.description}</p><div className="tech-tags">{project.technologies.map(tech => <span key={tech}>{tech}</span>)}</div>{project.href ? <a href={project.href} target="_blank" rel="noopener noreferrer">Visitar sitio <ExternalLink aria-hidden="true" /></a> : <span className="private-label">Vista previa privada</span>}</div>
+            <div className="project-info"><small>{project.type}</small><h3>{project.title}</h3><p>{project.detail ?? project.description}</p><div className="tech-tags">{project.technologies.map(tech => <span key={tech}>{tech}</span>)}</div>{project.href ? <a href={project.href} target="_blank" rel="noopener noreferrer">Visitar sitio <ExternalLink aria-hidden="true" /></a> : <span className="private-label">Vista previa privada</span>}</div>
           </article>)}
         </div></section>
 

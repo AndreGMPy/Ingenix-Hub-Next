@@ -28,7 +28,7 @@ INFORMACIÓN DEL NEGOCIO
 - El enfoque es diseño profesional, experiencia móvil, velocidad, contacto directo y soluciones adaptadas al negocio.
 - El diagnóstico inicial es gratuito.
 - Sitio: ingenixhub.com.
-- WhatsApp de contacto: +52 445 182 0808.
+- WhatsApp de contacto: +52 493 263 6339.
 
 TU OBJETIVO
 1. Entender qué necesita el prospecto.

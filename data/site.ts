@@ -1,15 +1,14 @@
-export const whatsappNumber = "524451820808";
+export const whatsappNumber = "524932636339";
 
 export const links = {
-  diagnostic: "https://wa.me/524451820808?text=Hola%2C%20quiero%20un%20diagn%C3%B3stico%20para%20crear%20una%20p%C3%A1gina%20web%20o%20app%20para%20mi%20negocio.",
-  quote: "https://wa.me/524451820808?text=Hola%2C%20quiero%20una%20cotizaci%C3%B3n%20personalizada%20para%20una%20p%C3%A1gina%20web%20o%20app%20para%20mi%20negocio.",
-  contact: "https://wa.me/524451820808?text=Hola%2C%20quiero%20un%20diagn%C3%B3stico%20para%20mi%20proyecto%20web.",
-  portfolioQuote: "https://wa.me/524451820808?text=Hola%2C%20vi%20tu%20portafolio%20y%20quiero%20cotizar%20un%20proyecto%20web.",
-  portfolioFloat: "https://wa.me/524451820808?text=Hola%2C%20vi%20tu%20portafolio%20y%20quiero%20cotizar%20un%20proyecto.",
+  diagnostic: "https://wa.me/524932636339?text=Hola%2C%20quiero%20un%20diagn%C3%B3stico%20para%20crear%20una%20p%C3%A1gina%20web%20o%20app%20para%20mi%20negocio.",
+  quote: "https://wa.me/524932636339?text=Hola%2C%20quiero%20una%20cotizaci%C3%B3n%20personalizada%20para%20una%20p%C3%A1gina%20web%20o%20app%20para%20mi%20negocio.",
+  contact: "https://wa.me/524932636339?text=Hola%2C%20quiero%20un%20diagn%C3%B3stico%20para%20mi%20proyecto%20web.",
+  portfolioQuote: "https://wa.me/524932636339?text=Hola%2C%20vi%20el%20portafolio%20de%20Ingenix%20Hub%20y%20quiero%20cotizar%20un%20proyecto%20web.",
+  portfolioFloat: "https://wa.me/524932636339?text=Hola%2C%20vi%20el%20portafolio%20de%20Ingenix%20Hub%20y%20quiero%20cotizar%20un%20proyecto.",
   calendly: "https://calendly.com/andregordillo9/30min",
   instagram: "https://www.instagram.com/ingenixhub?igsh=YjU4ZG5xMm5ocHM5&utm_source=qr",
   facebook: "https://www.facebook.com/share/18E1AF8CoZ/?mibextid=wwXIfr",
-  linkedin: "https://www.linkedin.com/in/brandon-andre-gordillo-moreno-342403418/",
   email: "mailto:ingenixhub@gmail.com",
 };
 
@@ -17,6 +16,7 @@ export type Project = {
   title: string;
   type: string;
   description: string;
+  detail?: string;
   image: string;
   alt: string;
   browser: string;
@@ -66,13 +66,15 @@ export const projects: Project[] = [
     href: "https://ejemplo-tienda-digital.vercel.app",
   },
   {
-    title: "Sistema de Control de Ventas",
-    type: "App web privada",
-    description: "Dashboard privado para ventas, gastos, ganancias, inventario y control del negocio.",
-    image: "/images/damaris-dashboard.png",
-    alt: "Vista previa de Sistema de Control de Ventas",
-    browser: "app privada / dashboard",
-    technologies: ["Next.js", "React", "PWA", "Dashboard"],
+    title: "Charly Alexa",
+    type: "Tienda en línea",
+    description: "Tienda en línea de ropa infantil con catálogo, búsqueda de productos, carrito, pagos y panel de administración.",
+    detail: "Plataforma desarrollada para una boutique infantil, con catálogo organizado por secciones, buscador, carrito de compras, gestión de productos, pedidos, pagos y herramientas administrativas.",
+    image: "/images/charly-alexa.png",
+    alt: "Vista previa de Charly Alexa, tienda en línea de ropa infantil",
+    browser: "charlyalexa.com",
+    technologies: ["Next.js", "TypeScript", "Firebase", "Stripe", "E-commerce"],
+    href: "https://charlyalexa.com",
   },
 ];
 
