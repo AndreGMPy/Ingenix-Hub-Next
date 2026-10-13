@@ -1,0 +1,54 @@
+V2.1 — archivos de aplicación y documentación cambiados
+Todos relativos a next-app-v2. No cambios en next-app ni legacy-site.
+
+app/layout.tsx
+app/page.tsx
+app/sitemap.ts
+app/v21.css
+app/portafolio/page.tsx
+components/layout/BrandIntro.tsx
+components/layout/HeaderState.tsx
+components/layout/Header.tsx
+components/layout/Footer.tsx
+components/layout/BottomNav.tsx
+components/home/Hero.tsx
+components/home/CapabilityPreview.tsx
+components/home/ArchitectureFlow.tsx
+components/home/ArchitectureStory.tsx
+components/home/NixConversation.tsx
+components/home/NixSection.tsx
+components/home/ScrollDirector.tsx
+components/portfolio/PortfolioCarousel.tsx
+components/portfolio/SelectedWork.tsx
+components/three/EcosystemScene.tsx
+components/three/EcosystemFallback.tsx
+components/three/HeroEcosystem.tsx
+eslint.config.mjs
+tsconfig.json
+.gitignore
+scripts/v21-before.mjs
+scripts/v21-preview.mjs
+scripts/v21-qa.mjs
+scripts/v21-intro-debug.mjs
+scripts/runtime-qa.mjs
+scripts/verify-integrity.mjs
+plans/006-v21-carousel-intent.md
+plans/007-v21-header-observer.md
+plans/008-v21-intro-gpu.md
+plans/README.md
+README.md
+V2_DESIGN_SYSTEM.md
+V2_EXPERIENCE_PLAN.md
+V21_VISUAL_COMPARISON.md
+V21_MOTION_OPPORTUNITIES.md
+V21_ANIMATION_REVIEW.md
+V21_BREAK_UI_REPORT.md
+V21_SKILL_LOG.md
+V21_QA_REPORT.md
+V21_FILES_CHANGED.txt
+
+Artefactos generados: qa-results/v21/*, qa-results/*-targeted-runtime.json,
+qa-results/performance.json, qa-results/integrity.json, V2_FILES_CREATED.txt.
+.next y .qa-v1 ignorados; .qa-v1 no forma parte de producción.
+Dependencias nuevas V2.1: NONE.
+

@@ -1,100 +1,45 @@
-export const whatsappNumber = "524932636339";
+export const site = {
+  name: "Ingenix Hub",
+  domain: "https://www.ingenixhub.com",
+  phone: "+52 493 263 6339",
+  telephone: "tel:+524932636339",
+  email: "ingenixhub@gmail.com",
+  whatsapp: "https://wa.me/524932636339",
+  quote: "https://wa.me/524932636339?text=Hola%2C%20quiero%20cotizar%20un%20proyecto%20con%20Ingenix%20Hub.",
+  instagram: "https://www.instagram.com/ingenixhub",
+  facebook: "https://www.facebook.com/share/18E1AF8CoZ/",
+} as const;
 
-export const links = {
-  diagnostic: "https://wa.me/524932636339?text=Hola%2C%20quiero%20un%20diagn%C3%B3stico%20para%20crear%20una%20p%C3%A1gina%20web%20o%20app%20para%20mi%20negocio.",
-  quote: "https://wa.me/524932636339?text=Hola%2C%20quiero%20una%20cotizaci%C3%B3n%20personalizada%20para%20una%20p%C3%A1gina%20web%20o%20app%20para%20mi%20negocio.",
-  contact: "https://wa.me/524932636339?text=Hola%2C%20quiero%20un%20diagn%C3%B3stico%20para%20mi%20proyecto%20web.",
-  portfolioQuote: "https://wa.me/524932636339?text=Hola%2C%20vi%20el%20portafolio%20de%20Ingenix%20Hub%20y%20quiero%20cotizar%20un%20proyecto%20web.",
-  portfolioFloat: "https://wa.me/524932636339?text=Hola%2C%20vi%20el%20portafolio%20de%20Ingenix%20Hub%20y%20quiero%20cotizar%20un%20proyecto.",
-  calendly: "https://calendly.com/andregordillo9/30min",
-  instagram: "https://www.instagram.com/ingenixhub?igsh=YjU4ZG5xMm5ocHM5&utm_source=qr",
-  facebook: "https://www.facebook.com/share/18E1AF8CoZ/?mibextid=wwXIfr",
-  email: "mailto:ingenixhub@gmail.com",
+export type CapabilityId = "web" | "commerce" | "systems" | "apps" | "automation" | "ai";
+export type Capability = {
+  id: CapabilityId; number: string; name: string; short: string;
+  title: string; description: string; includes: readonly string[];
 };
-
-export type Project = {
-  title: string;
-  type: string;
-  description: string;
-  detail?: string;
-  image: string;
-  alt: string;
-  browser: string;
-  technologies: string[];
-  href?: string;
-};
-
-export const projects: Project[] = [
-  {
-    title: "TextiBajío",
-    type: "Directorio y plataforma web",
-    description: "Plataforma para digitalizar negocios textiles con perfiles, catálogo y contacto directo.",
-    image: "/images/textibajio.png",
-    alt: "Vista previa de TextiBajío",
-    browser: "textibajio.com",
-    technologies: ["Firebase", "HTML", "CSS", "JavaScript"],
-    href: "https://textibajio.com",
-  },
-  {
-    title: "Gama Studio MX",
-    type: "Sitio web corporativo",
-    description: "Sitio profesional para presentar servicios, fortalecer marca y captar clientes con claridad.",
-    image: "/images/gama-studio.png",
-    alt: "Vista previa de Gama Studio MX",
-    browser: "gamastudiomx.com",
-    technologies: ["Next.js", "React", "TypeScript", "Tailwind CSS"],
-    href: "https://gamastudiomx.com",
-  },
-  {
-    title: "Cuellos Textiles Goar",
-    type: "Catálogo y página web",
-    description: "Página enfocada en mostrar productos textiles y facilitar el contacto comercial.",
-    image: "/images/cuellos-textiles-goar.png",
-    alt: "Vista previa de Cuellos Textiles Goar",
-    browser: "cuellos-textiles-goar.vercel.app",
-    technologies: ["HTML", "CSS", "Responsive", "Vercel"],
-    href: "https://cuellos-textiles-goar.vercel.app",
-  },
-  {
-    title: "Demo de Ventas Online",
-    type: "Demo comercial",
-    description: "Demo para mostrar catálogo, experiencia de compra y flujo de contacto comercial.",
-    image: "/images/demo-tienda-online.png",
-    alt: "Vista previa de Demo de Ventas Online",
-    browser: "ejemplo-tienda-digital.vercel.app",
-    technologies: ["Node.js", "JavaScript", "HTML/CSS", "Backend"],
-    href: "https://ejemplo-tienda-digital.vercel.app",
-  },
-  {
-    title: "Charly Alexa",
-    type: "Tienda en línea",
-    description: "Tienda en línea de ropa infantil con catálogo, búsqueda de productos, carrito, pagos y panel de administración.",
-    detail: "Plataforma desarrollada para una boutique infantil, con catálogo organizado por secciones, buscador, carrito de compras, gestión de productos, pedidos, pagos y herramientas administrativas.",
-    image: "/images/charly-alexa.png",
-    alt: "Vista previa de Charly Alexa, tienda en línea de ropa infantil",
-    browser: "charlyalexa.com",
-    technologies: ["Next.js", "TypeScript", "Firebase", "Stripe", "E-commerce"],
-    href: "https://charlyalexa.com",
-  },
+export const capabilities: readonly Capability[] = [
+  { id: "web", number: "01", name: "Páginas web", short: "Tu primera impresión, bien hecha.", title: "Una web a la altura de tu negocio.", description: "Presenta lo que haces con claridad. Una página rápida, diseñada para tu marca y para las personas que la visitan.", includes: ["Diseño a medida", "Contacto directo", "SEO y rendimiento"] },
+  { id: "commerce", number: "02", name: "E-commerce", short: "Del catálogo al pedido.", title: "Tu tienda, abierta y conectada.", description: "Catálogos digitales y tiendas en línea con productos, carrito, pagos y un panel para administrar la operación.", includes: ["Catálogo y búsqueda", "Carrito y pagos", "Gestión de pedidos"] },
+  { id: "systems", number: "03", name: "Sistemas web", short: "Menos hojas sueltas. Más control.", title: "Software para tu forma de trabajar.", description: "Centraliza productos, clientes, pedidos o información en un sistema que responda a tus procesos.", includes: ["Paneles administrativos", "Roles y permisos", "Bases de datos"] },
+  { id: "apps", number: "04", name: "Apps web / PWA", short: "Tu herramienta, donde la necesitas.", title: "La experiencia de una app. En la web.", description: "Aplicaciones que funcionan desde el navegador y pueden instalarse en el teléfono. Acceso rápido para tu equipo o tus clientes.", includes: ["Experiencia móvil", "Instalación PWA", "Funciones a medida"] },
+  { id: "automation", number: "05", name: "Automatización", short: "Conecta lo que hoy haces a mano.", title: "Que los procesos sigan su curso.", description: "Conectamos formularios, pedidos, notificaciones y herramientas para reducir tareas repetitivas, según las integraciones disponibles.", includes: ["Flujos de trabajo", "Integración de herramientas", "Notificaciones"] },
+  { id: "ai", number: "06", name: "Inteligencia artificial", short: "IA con una tarea concreta.", title: "Una nueva forma de atender y operar.", description: "Asistentes y herramientas de IA que ayudan a entender consultas, organizar información y orientar a las personas.", includes: ["Asistentes virtuales", "Análisis de información", "Flujos con IA"] },
 ];
 
-export const services = [
-  { code: "01 / WEB", title: "Páginas web profesionales", description: "Para negocios, marcas personales, talleres, estudios, consultorios o servicios que necesitan verse confiables." },
-  { code: "02 / CAT", title: "Catálogos digitales", description: "Presenta productos, menús, paquetes o servicios con categorías, fotos y botones directos a WhatsApp." },
-  { code: "03 / PWA", title: "Apps web y PWA", description: "Sistemas que funcionan desde navegador y pueden sentirse como app en el celular del negocio." },
-  { code: "04 / CMS", title: "Paneles administrables", description: "Edita productos, precios, fotos, ventas, pedidos o contenido desde un panel privado." },
-];
+export const architecture = [
+  { number: "01", name: "Negocio", label: "El punto de partida", description: "Entendemos qué necesitas resolver y cómo trabajas hoy.", tags: ["Objetivo", "Personas", "Proceso"] },
+  { number: "02", name: "Interfaz", label: "Lo que tu cliente ve", description: "Diseñamos una experiencia clara, tanto en un teléfono como en una computadora.", tags: ["Diseño", "Experiencia móvil"] },
+  { number: "03", name: "Software / API", label: "Lo que hace que funcione", description: "Convertimos las funciones en lógica y conectamos los sistemas que tu proyecto necesita.", tags: ["Lógica", "Integraciones"] },
+  { number: "04", name: "Datos", label: "Información con estructura", description: "Organizamos la información y definimos quién puede consultarla o modificarla.", tags: ["Base de datos", "Permisos"] },
+  { number: "05", name: "Automatización", label: "Menos trabajo repetitivo", description: "Un evento puede iniciar el siguiente paso: un pedido, una notificación o una actualización.", tags: ["Eventos", "Flujos"] },
+  { number: "06", name: "Inteligencia artificial", label: "Cuando aporta valor", description: "Integramos IA donde ayuda a interpretar información o atender consultas.", tags: ["Asistentes", "Análisis"] },
+  { number: "07", name: "Resultado", label: "Una herramienta útil", description: "Un producto que puedes usar, administrar y hacer crecer con tu negocio.", tags: ["Operación", "Evolución"] },
+] as const;
 
 export const processSteps = [
-  { number: "01", title: "Diagnóstico", description: "Me cuentas qué vendes, qué quieres lograr y qué problema quieres resolver." },
-  { number: "02", title: "Alcance", description: "Definimos si necesitas web, catálogo, app, panel, formulario, pagos o automatización." },
-  { number: "03", title: "Propuesta", description: "Te paso una cotización clara con entregables, tiempos y forma de trabajo." },
-  { number: "04", title: "Lanzamiento", description: "Diseñamos, revisamos, publicamos y te explico cómo usar tu proyecto." },
-];
+  { title: "Idea", description: "Nos cuentas qué quieres crear." },
+  { title: "Diagnóstico", description: "Definimos el problema y el alcance." },
+  { title: "Diseño", description: "Damos forma a la experiencia." },
+  { title: "Desarrollo", description: "Construimos y conectamos las piezas." },
+  { title: "Pruebas", description: "Revisamos funciones y dispositivos." },
+  { title: "Lanzamiento", description: "Lo ponemos en marcha contigo." },
+] as const;
 
-export const faq = [
-  { question: "¿Por qué la cotización es personalizada?", answer: "Porque cada proyecto cambia según secciones, contenido, funciones, panel, base de datos, pagos, automatizaciones o integraciones. Cotizar directo evita confusiones." },
-  { question: "¿Qué necesito para cotizar?", answer: "Solo dime qué tipo de negocio tienes, qué quieres lograr, si tienes logo/fotos/textos y si necesitas mostrar productos, vender, recibir pedidos o administrar contenido." },
-  { question: "¿La página se verá bien en celular?", answer: "Sí. El diseño se trabaja con enfoque mobile-first porque la mayoría de clientes entra desde el teléfono." },
-  { question: "¿Puedo crecer el proyecto después?", answer: "Sí. Podemos iniciar con una web sencilla y luego agregar catálogo, panel, pagos, notificaciones o funciones especiales." },
-];

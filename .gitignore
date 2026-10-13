@@ -1,7 +1,9 @@
-/node_modules
-/.next
-/out
-/.vercel
-*.log
+node_modules/
+.next/
 .env*
 !.env.example
+*.tsbuildinfo
+qa-results/
+*.log
+
+.qa-v1/

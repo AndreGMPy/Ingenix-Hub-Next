@@ -1,0 +1,129 @@
+.proto-picker {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2147483647;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+  border-radius: 999px;
+  background: rgba(10, 10, 10, 0.82);
+  -webkit-backdrop-filter: blur(12px) saturate(1.4);
+  backdrop-filter: blur(12px) saturate(1.4);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.08) inset,
+    0 8px 24px rgba(0, 0, 0, 0.24),
+    0 2px 6px rgba(0, 0, 0, 0.12);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 13px;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.proto-picker-highlight {
+  position: absolute;
+  top: 4px;
+  left: 0;
+  height: 28px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  will-change: transform;
+}
+
+/* The slide is enabled only after first paint (data-ready), so load doesn't animate. */
+.proto-picker[data-ready] .proto-picker-highlight {
+  transition:
+    transform 250ms cubic-bezier(0.23, 1, 0.32, 1),
+    width 250ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .proto-picker[data-ready] .proto-picker-highlight { transition: none; }
+}
+
+.proto-picker-item {
+  position: relative; /* sits above the highlight */
+  display: flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.55);
+  font: inherit;
+  cursor: pointer;
+  transition: color 150ms ease-out;
+}
+
+.proto-picker-item:hover {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.proto-picker-item:active {
+  transform: scale(0.97);
+}
+
+.proto-picker-item:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.4);
+  outline-offset: 2px;
+}
+
+.proto-picker-item[data-active] {
+  color: #fff;
+}
+
+.proto-picker-divider {
+  width: 1px;
+  height: 16px;
+  margin: 0 4px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.proto-picker-replay {
+  padding: 0 10px;
+  font-size: 14px;
+}
+
+.proto-picker[data-position="top"] {
+  bottom: auto;
+  top: 24px;
+}
+
+/* Prototype-only alternatives. The picker above preserves the skill's literal chrome. */
+.editorial-proto { padding-block:4rem 3rem; }
+.editorial-proto h1 { max-width:20ch; font-size:clamp(2.625rem,5.4vw,4.75rem); letter-spacing:-.055em; }
+.editorial-proto h1 span,.blueprint-proto h1 span { color:var(--accent); }
+.editorial-proto-intro { display:flex; justify-content:space-between; align-items:center; gap:3rem; margin-block:2rem 2.5rem; }
+.editorial-proto-intro p { color:var(--muted); max-width:52ch; }
+.editorial-proto-work { display:grid; grid-template-columns:minmax(0,3fr) minmax(0,1fr); gap:2rem; align-items:end; }
+.editorial-proto-work img { width:100%; height:auto; border:1px solid var(--line); border-radius:10px; }
+.editorial-proto-work .mono { font-size:.625rem; color:var(--muted); }
+.editorial-proto-work p { margin-block:1rem; }
+.blueprint-proto { padding-block:3.5rem; }
+.blueprint-proto h1 { font-size:clamp(2.625rem,5vw,4.5rem); letter-spacing:-.055em; }
+.blueprint-proto>p:last-of-type { margin-top:1rem; color:var(--muted); }
+.blueprint-console { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,2fr); gap:2rem; margin-top:2.5rem; }
+.blueprint-controls { display:flex; flex-direction:column; gap:.25rem; }
+.blueprint-controls button { display:flex; align-items:center; gap:1rem; min-height:52px; padding:1rem; text-align:left; border:1px solid var(--line); border-radius:8px; background:var(--surface); }
+.blueprint-controls button[aria-pressed=true] { color:var(--accent); border-color:var(--accent); }
+.blueprint-controls button svg { margin-left:auto; }
+.blueprint-controls .mono { font-size:.625rem; }
+.blueprint-preview { padding:1.5rem; border:1px solid var(--line); border-radius:14px; background:var(--surface-2); }
+.blueprint-preview>.mono { color:var(--muted); font-size:.625rem; }
+.blueprint-preview>div { margin-block:1.5rem; }
+@media(max-width:767px), (hover:none) and (pointer:coarse) and (max-height:500px) {
+ .editorial-proto,.blueprint-proto { padding-top:4rem; }
+ .editorial-proto-intro { flex-direction:column; align-items:stretch; gap:1.5rem; }
+ .editorial-proto-work { grid-template-columns:minmax(0,1fr); gap:1.5rem; }
+ .blueprint-console { grid-template-columns:minmax(0,1fr); gap:1rem; }
+ .blueprint-controls { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); }
+ .blueprint-controls button { font-size:.75rem; padding:.625rem; gap:.5rem; }
+ .blueprint-preview { padding:1rem; }
+ .blueprint-preview .button { width:100%; }
+}
+
