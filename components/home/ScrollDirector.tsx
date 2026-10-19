@@ -14,9 +14,12 @@ function heroShowcase(gsap: Gsap, mobile: boolean) {
  if (!hero || !n) return;
  const q = gsap.utils.selector(hero);
  const counts = q(".hero3d-count>span"), glows = q(".hero3d-glow"), shots = q(".phone2d-shot"), phone = q(".phone2d");
+ const front = q(".phone2d-front"), back = q(".phone2d-back");
  const steps = showcaseSteps(n), span = steps[1] - steps[0], fade = span * .12;
  const swap = span * (SHOWCASE_HOLD + (1 - SHOWCASE_HOLD) / 2);
  const layout = showcaseLayout(mobile), restYaw = mobile ? -7 : -18;
+ // En táctil el scroll nativo ya trae inercia: menos suavizado para que el celular no "arrastre" detrás del dedo.
+ const touch = window.matchMedia("(pointer: coarse)").matches;
  // pinSpacer = #inicio (ya en el SSR): sin reparentar la sección, que Chrome contaría como un LCP tardío.
  // Poses relativas a la capa del dispositivo: la misma caja que ocupa el canvas WebGL.
  const layer = hero.querySelector<HTMLElement>(".hero3d-device") ?? hero;
@@ -29,7 +32,7 @@ function heroShowcase(gsap: Gsap, mobile: boolean) {
  gsap.set(q(".hero3d-progress"), { autoAlpha: 0 });
  gsap.set(q(".hero3d-final"), { autoAlpha: 0, y: 24 });
  const tl = gsap.timeline({ defaults: { ease: "none" }, onUpdate: () => setHeroProgress(tl.progress()), scrollTrigger: {
-  trigger: hero, start: () => "top " + header(), end: () => "+=" + Math.round(innerHeight * (1 + n * .62)), pin: true, pinSpacer: hero.parentElement ?? undefined, scrub: .5,
+  trigger: hero, start: () => "top " + header(), end: () => "+=" + Math.round(innerHeight * (1 + n * .62)), pin: true, pinSpacer: hero.parentElement ?? undefined, scrub: touch ? .25 : .5,
   anticipatePin: 1, invalidateOnRefresh: true, onRefresh: safeRange,
   onToggle: self => document.documentElement.toggleAttribute("data-hero-pinned", self.isActive) } });
  tl.to(q(".hero3d-copy"), { autoAlpha: 0, y: -48, duration: SHOWCASE_INTRO * .8 }, 0)
@@ -40,6 +43,11 @@ function heroShowcase(gsap: Gsap, mobile: boolean) {
   .to([counts[0], glows[0]], { opacity: 1, duration: SHOWCASE_INTRO * .4 }, SHOWCASE_INTRO * .6);
  for (let i = 0; i < n - 1; i++) {
   const turn = steps[i] + span * SHOWCASE_HOLD, at = steps[i] + swap;
+  // Cara visible decidida por el timeline (no sólo backface-visibility, que algunos motores ignoran al aplanar el 3D):
+  // con power1.inOut el giro pasa por 90° y 270° en t≈.354 y t≈.646 de su duración.
+  const turnDuration = span * (1 - SHOWCASE_HOLD);
+  tl.set(back, { opacity: 1 }, turn + turnDuration * .354).set(front, { opacity: 0 }, turn + turnDuration * .354)
+   .set(back, { opacity: 0 }, turn + turnDuration * .646).set(front, { opacity: 1 }, turn + turnDuration * .646);
   tl.to(phone, { rotationY: restYaw + 360 * (i + 1), duration: span * (1 - SHOWCASE_HOLD), ease: "power1.inOut" }, turn)
    .set(shots[i + 1], { opacity: 1 }, at).set(shots[i], { opacity: 0 }, at)
    .to(glows[i], { opacity: 0, duration: span * (1 - SHOWCASE_HOLD) }, turn).to(glows[i + 1], { opacity: 1, duration: span * (1 - SHOWCASE_HOLD) }, turn)
@@ -59,7 +67,10 @@ export function ScrollDirector() {
   const events=["pointermove","pointerdown","touchstart","wheel","scroll","keydown"] as const;
   const load=()=>{events.forEach(type=>window.removeEventListener(type,load));
   Promise.all([import("gsap"),import("gsap/ScrollTrigger")]).then(([{gsap},{ScrollTrigger}])=>{
-   if(disposed)return;gsap.registerPlugin(ScrollTrigger);const media=gsap.matchMedia();
+   if(disposed)return;gsap.registerPlugin(ScrollTrigger);
+   // iOS: la barra de dirección cambia el alto al desplazar; no recalcular el pin por eso (evita saltos a media animación).
+   ScrollTrigger.config({ignoreMobileResize:true});
+   const media=gsap.matchMedia();
    // El hero va primero: su pin desplaza a todos los triggers que vienen después.
    media.add({scroll:SHOWCASE_QUERY,mobile:MOBILE_QUERY},context=>{const {scroll,mobile}=context.conditions as {scroll:boolean;mobile:boolean};return scroll?heroShowcase(gsap,mobile):undefined;});
    media.add("(prefers-reduced-motion:no-preference)",()=>{

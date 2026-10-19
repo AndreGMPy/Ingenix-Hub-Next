@@ -23,7 +23,10 @@ async function makePage(width=1440,height=900,extra={}){
 }
 async function home(page,path=""){const r=await page.goto(origin+path,{waitUntil:"networkidle",timeout:90000});assert(r?.status()===200,"Home status "+r?.status());assert(await page.locator("main h1").isVisible(),"Hero absent");await page.waitForTimeout(300);}
 // El hero carga WebGL con la primera interacción (LCP = poster 2D); QA la simula antes de esperar el 3D.
-async function ready3d(page){await page.mouse.move(40,40);await page.locator("[data-webgl=ready]").waitFor({timeout:45000});}
+// En pantallas táctiles el hero usa el celular CSS con video nativo (sin WebGL): se verifica el pin y el mockup.
+async function ready3d(page){await page.mouse.move(40,40);
+ if(await page.evaluate(()=>matchMedia("(pointer: coarse)").matches)){await page.locator(".hero3d[data-motion]").waitFor({timeout:45000});assert(await page.locator("[data-webgl]").getAttribute("data-webgl")==="fallback","touch should use CSS phone");assert(await page.locator(".phone2d").isVisible(),"CSS phone hidden");assert(!(await page.locator(".hero3d-canvas").count()),"touch loaded WebGL");return;}
+ await page.locator("[data-webgl=ready]").waitFor({timeout:45000});}
 async function scrollAll(page){
  await page.mouse.wheel(0,1);
  const height=await page.evaluate(()=>document.documentElement.scrollHeight);
@@ -52,7 +55,7 @@ try{
    for(let i=0;i<6;i++){await tabs.nth(i).click();assert(await tabs.nth(i).getAttribute("aria-selected")==="true","service not selected");assert(await page.locator(".capability-detail h3").textContent(),"missing detail");}
    await page.evaluate(()=>window.scrollTo({top:0,behavior:"instant"}));await page.waitForTimeout(300);
    await page.screenshot({path:"qa-results/"+mode+"-"+width+"-light.png"});
-   report.viewports.push({width,height,theme:"light",status:"PASS",webgl:"ready",overflow:result.extra});
+   report.viewports.push({width,height,theme:"light",status:"PASS",webgl:await page.locator("[data-webgl]").getAttribute("data-webgl"),overflow:result.extra});
    await page.getByRole("button",{name:"Activar modo oscuro"}).click();
    assert(await page.locator("html").getAttribute("data-theme")==="dark","theme dark");
    await page.waitForTimeout(400);assert((await overflow(page)).extra<=1,"dark overflow");
@@ -94,10 +97,10 @@ try{
   assert(await mobile.page.locator(".nix-backdrop").evaluate(e=>getComputedStyle(e).transitionDuration==="0s"),"keyboard backdrop animation");
   await mobile.page.keyboard.press("Escape");await mobile.page.getByRole("dialog").waitFor({state:"hidden"});await mobile.context.close();
  });
- await check("3D pause and fallbacks",async()=>{
+ await check("3D and fallbacks",async()=>{
   await home(page);
   await page.evaluate(()=>window.scrollTo({top:0,behavior:"instant"}));await ready3d(page);
-  await page.getByRole("button",{name:"Pausar movimiento"}).click();await page.getByRole("button",{name:"Activar movimiento"}).click();
+  
   await home(page,"?webgl=off");assert(await page.locator("[data-webgl]").getAttribute("data-webgl")==="fallback","explicit fallback absent");
   assert(await page.getByRole("link",{name:"Hablemos de tu proyecto"}).isVisible(),"CTA blocked");
   const noGpu=await makePage(1440,900);await noGpu.page.addInitScript(()=>{const original=HTMLCanvasElement.prototype.getContext;HTMLCanvasElement.prototype.getContext=function(type,...args){return type==="webgl2"?null:original.call(this,type,...args);};});

@@ -45,7 +45,8 @@ Dos motores no comparten la misma propiedad del mismo nodo.
 ## 5. Reduced motion y primer cuadro
 - `prefers-reduced-motion: reduce` → sin pin, sin scrub, sin flotación ni vaivén; se muestra la versión estática con todo el contenido y controles.
 - El primer cuadro (SSR, sin JS) ya es completo: titular, CTA, mockup con la primera captura y la lista de proyectos legible.
-- Movimiento continuo de más de 5 s tiene control de pausa (WCAG 2.2.2).
+- El hero no lleva botón de pausa por decisión del cliente (2026-10-19); reduced motion sigue desactivando flotación, giro y video. Ojo: WCAG 2.2.2 pide pausa para movimiento automático de más de 5 s.
+- Pantallas táctiles: celular CSS + `<video>` nativo, sin WebGL (`?webgl=on` para forzarlo). Capas grandes (brillos) a mitad de tamaño con `scale(2)`.
 
 ## 6. Tokens
 fast 160ms · press 120ms · normal 240ms · slow 600ms · stagger 50ms · ease-out `cubic-bezier(.23,1,.32,1)` · ease-in-out `cubic-bezier(.77,0,.175,1)`. En GSAP: `"power3.out"` ≈ ease-out, `"none"` dentro de timelines con scrub. Damping R3F: `MathUtils.damp(..., 4–6, dt)` con `dt` acotado a `.06`.

@@ -1,6 +1,5 @@
 "use client";
 import dynamic from "next/dynamic";
-import { Pause, Play } from "lucide-react";
 import { Component, useCallback, useEffect, useRef, useState, type ReactNode, type RefObject } from "react";
 import type { ShowcaseItem } from "@/data/showcase";
 import { showcaseFrame } from "@/lib/motion";
@@ -16,7 +15,12 @@ class SceneBoundary extends Component<{ children: ReactNode; onFailure: () => vo
 }
 type Nav = Navigator & { deviceMemory?: number; connection?: { saveData?: boolean } };
 function capable3D() {
-  if (new URLSearchParams(window.location.search).get("webgl") === "off") return false;
+  const param = new URLSearchParams(window.location.search).get("webgl");
+  if (param === "off") return false;
+  // Pantallas táctiles (iPhone, Android, iPad): celular CSS + <video> nativo, que el sistema compone por hardware.
+  // En iOS Safari subir cada cuadro de video a WebGL y componer un canvas transparente durante el pin produce tirones.
+  // ?webgl=on fuerza la escena 3D para comparar.
+  if (param !== "on" && window.matchMedia("(pointer: coarse)").matches) return false;
   const nav = navigator as Nav;
   if (nav.connection?.saveData || (nav.deviceMemory ?? 8) <= 2 || (nav.hardwareConcurrency ?? 8) <= 2) return false;
   try {
@@ -54,7 +58,6 @@ export function HeroPhone({ items }: { items: readonly ShowcaseItem[] }) {
   const [pageVisible, setPageVisible] = useState(true);
   const [ready, setReady] = useState(false);
   const [failed, setFailed] = useState(false);
-  const [paused, setPaused] = useState(false);
   const [dark, setDark] = useState(false);
   // Las capturas 2–5 esperan a la primera interacción para no competir con el LCP (la primera ya está en el HTML).
   const [warm, setWarm] = useState(false);
@@ -62,7 +65,7 @@ export function HeroPhone({ items }: { items: readonly ShowcaseItem[] }) {
   const mobile = useMedia(MOBILE_QUERY);
   const scroll = useMedia(SHOWCASE_QUERY);
   // Video del proyecto activo: se reproduce al desplazar (mismo índice que el giro), los demás se pausan; el siguiente se precarga.
-  const playing = scroll && warm && visible && pageVisible && !paused;
+  const playing = scroll && warm && visible && pageVisible;
   useEffect(() => {
     if (!warm) return;
     const list = videos.current;
@@ -117,10 +120,7 @@ export function HeroPhone({ items }: { items: readonly ShowcaseItem[] }) {
   return <div className="hero3d-device" ref={root} data-webgl={live ? "ready" : "fallback"}>
     <div className={"phone2d-layer" + (live ? " is-hidden" : "")}><PhoneMockup items={items} warm={warm} videos={videos} /></div>
     {use3D && <SceneBoundary onFailure={onFailure}><div className={"hero3d-canvas" + (ready ? " is-ready" : "")}>
-      <PhoneScene items={items} videos={videos} mobile={mobile} running={visible && pageVisible} animate={!paused} dark={dark} onReady={onReady} onFailure={onFailure} />
+      <PhoneScene items={items} videos={videos} mobile={mobile} running={visible && pageVisible} animate dark={dark} onReady={onReady} onFailure={onFailure} />
     </div></SceneBoundary>}
-    {scroll && warm && <button type="button" className="hero3d-pause icon-button" aria-label={paused ? "Activar movimiento y video" : "Pausar movimiento y video"} aria-pressed={paused} onClick={() => setPaused(value => !value)}>
-      {paused ? <Play size={14} aria-hidden="true" /> : <Pause size={14} aria-hidden="true" />}
-    </button>}
   </div>;
 }
