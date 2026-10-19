@@ -1,24 +1,35 @@
-import Image from "next/image";
 import { ArrowDown, ArrowUpRight } from "lucide-react";
 import { site } from "@/data/site";
-import { HeroEcosystem } from "@/components/three/HeroEcosystem";
+import { showcase } from "@/data/showcase";
+import { HeroPhone } from "@/components/home/HeroPhone";
+import { NixButton } from "@/components/ui/NixButton";
+const pad = (value: number) => String(value).padStart(2, "0");
 export function Hero() {
- return <section id="inicio" className="hero container" aria-labelledby="hero-title">
-  <div className="hero-copy">
-   <p className="eyebrow"><span className="status-dot"/>INGENIX HUB — ESTUDIO DE SOFTWARE & DISEÑO</p>
-   <div className="hero-editorial"><h1 id="hero-title">Tu negocio.<br/><span>En otra dimensión.</span></h1>
-    <div className="hero-brief"><p className="hero-description">Una web que se siente tuya. Una tienda lista para vender. Software que hace más fácil tu día.</p>
-     <div className="hero-actions"><a href={site.quote} target="_blank" rel="noopener noreferrer" className="button">Hablemos de tu proyecto<ArrowUpRight size={18} aria-hidden="true"/></a><a href="#proyectos" className="text-link">Mira lo que construimos<ArrowDown size={16} aria-hidden="true"/></a></div>
-    </div>
+ const total = pad(showcase.length);
+ // #inicio vive fuera del nodo pinned: tras el pin, GSAP deja la sección al final del pin-spacer y el ancla aterrizaría ahí.
+ return <div id="inicio" className="hero3d-anchor"><section className="hero3d" aria-labelledby="hero-title">
+  <div className="hero3d-glows" aria-hidden="true">{showcase.map((item, index) => <i key={item.slug} className="hero3d-glow" data-index={index} style={{ "--glow": item.color } as React.CSSProperties} />)}</div>
+  <div className="hero3d-stage container">
+   <div className="hero3d-copy">
+    <p className="eyebrow"><span className="status-dot"/>INGENIX HUB — ESTUDIO DE SOFTWARE & DISEÑO</p>
+    <h1 id="hero-title">Tu negocio.<br/><span>En otra dimensión.</span></h1>
+    <p className="hero3d-description">Una web que se siente tuya. Una tienda lista para vender. Software que hace más fácil tu día.</p>
+    <div className="hero3d-actions"><a href={site.quote} target="_blank" rel="noopener noreferrer" className="button">Hablemos de tu proyecto<ArrowUpRight size={18} aria-hidden="true"/></a><a href="#proyectos" className="text-link">Mira lo que construimos<ArrowDown size={16} aria-hidden="true"/></a></div>
+   </div>
+   <HeroPhone items={showcase}/>
+   <div className="hero3d-projects">
+    <p className="hero3d-progress mono" aria-hidden="true"><span className="hero3d-count">{showcase.map((item, index) => <span key={item.slug} data-index={index}>{pad(index + 1)}</span>)}</span><span>/ {total}</span></p>
+    <ol className="hero3d-list" aria-label="Proyectos en el celular">
+     {showcase.map((item, index) => <li key={item.slug} className="hero3d-project" data-index={index} style={{ "--project": item.color } as React.CSSProperties}>
+      <span className="mono">{item.category}</span><strong>{item.title}</strong>
+     </li>)}
+    </ol>
+    <p className="hero3d-hint mono" aria-hidden="true"><span/>Desliza para ver proyectos</p>
+   </div>
+   <div className="hero3d-final">
+    <h2>¿Tienes una idea? <span>Construyámosla.</span></h2>
+    <div className="hero3d-final-actions"><a href={site.quote} target="_blank" rel="noopener noreferrer" className="button">Escríbenos por WhatsApp<ArrowUpRight size={18} aria-hidden="true"/></a><NixButton/></div>
    </div>
   </div>
-  <div className="hero-workbench">
-   <div className="workbench-rail mono" aria-hidden="true"><span>DISEÑO + INGENIERÍA</span><span>EST. MÉXICO / PARA TU NEGOCIO</span></div>
-   <div className="hero-proof hero-proof-web"><div className="hero-proof-bar mono"><span className="status-dot"/>01 / EXPERIENCIAS REALES</div><Image src="/images/gama-studio.webp" width={1837} height={875} sizes="(max-width:767px) 160px, 300px" alt="Proyecto Gama Studio" quality={75}/><div className="hero-proof-caption"><span>De tu identidad<br/><strong>a tu sitio.</strong></span><ArrowUpRight size={20}/></div></div>
-   <HeroEcosystem/>
-   <div className="hero-proof hero-proof-commerce"><div className="hero-proof-bar mono"><span className="status-dot"/>02 / NEGOCIOS CONECTADOS</div><div className="hero-mini-order"><span className="mono">TU OPERACIÓN</span><strong>Una venta.<br/>Todo conectado.</strong><div><i/><span>Catálogo</span><span>→</span><span>Pedido</span></div><div><i/><span>Inventario</span><span>→</span><span>Equipo</span></div></div><div className="hero-proof-caption"><span>Software, automatización<br/><strong>e inteligencia artificial.</strong></span><ArrowUpRight size={20}/></div></div>
-  </div>
-  <div className="hero-bottom"><span>Tu identidad. Nuestra ingeniería.</span><span className="hero-bottom-tags">WEB <i/> E-COMMERCE <i/> SISTEMAS <i/> IA</span><a href="#servicios" aria-label="Continuar a servicios"><ArrowDown size={18} aria-hidden="true"/></a></div>
- </section>;
+ </section></div>;
 }
-

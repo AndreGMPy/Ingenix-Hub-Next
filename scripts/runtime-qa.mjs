@@ -1,6 +1,8 @@
 import { chromium } from "@playwright/test";
 import { mkdir, writeFile, readFile } from "node:fs/promises";
 import { createRequire } from "node:module";
+import { projects } from "../data/projects.ts";
+import { landings } from "../data/landings.ts";
 const require=createRequire(import.meta.url);
 const origin=process.env.QA_ORIGIN||"http://127.0.0.1:4173";
 const mode=origin.endsWith(":4174")?"prod":"dev";
@@ -20,12 +22,14 @@ async function makePage(width=1440,height=900,extra={}){
  return {context,page};
 }
 async function home(page,path=""){const r=await page.goto(origin+path,{waitUntil:"networkidle",timeout:90000});assert(r?.status()===200,"Home status "+r?.status());assert(await page.locator("main h1").isVisible(),"Hero absent");await page.waitForTimeout(300);}
+// El hero carga WebGL con la primera interacción (LCP = poster 2D); QA la simula antes de esperar el 3D.
+async function ready3d(page){await page.mouse.move(40,40);await page.locator("[data-webgl=ready]").waitFor({timeout:45000});}
 async function scrollAll(page){
  await page.mouse.wheel(0,1);
  const height=await page.evaluate(()=>document.documentElement.scrollHeight);
  for(let y=0;y<height;y+=650){await page.evaluate(y=>window.scrollTo({top:y,behavior:"instant"}),y);await page.waitForTimeout(70);}
  if(await page.locator("footer").count())await page.locator("footer").first().scrollIntoViewIfNeeded();
- await page.waitForFunction(()=>[...document.images].filter(i=>i.getBoundingClientRect().width>0&&i.getBoundingClientRect().right>0&&i.getBoundingClientRect().left<innerWidth).every(i=>i.complete&&i.naturalWidth>0),{},{timeout:20000});
+ await page.waitForFunction(()=>[...document.images].filter(i=>{const r=i.getBoundingClientRect();return r.width>0&&r.right>0&&r.left<innerWidth&&r.bottom>0&&r.top<innerHeight;}).every(i=>i.complete&&i.naturalWidth>0),{},{timeout:20000});
  await page.evaluate(()=>window.scrollTo({top:0,behavior:"instant"}));await page.waitForTimeout(400);
 }
 async function overflow(page){return page.evaluate(()=>({extra:Math.max(document.documentElement.scrollWidth,document.body.scrollWidth)-document.documentElement.clientWidth,offenders:[...document.querySelectorAll("main *,header *,footer *,nav *")].filter(e=>{const r=e.getBoundingClientRect();return r.width>0&&(r.right>innerWidth+2||r.left< -2)&&getComputedStyle(e).position!=="fixed";}).slice(0,15).map(e=>({tag:e.tagName,cls:e.className,width:e.getBoundingClientRect().width}))}));}
@@ -39,10 +43,10 @@ try{
  for(const [width,height]of filter?[]:sizes){
   const {context,page}=await makePage(width,height);
   await check("viewport "+width+"x"+height,async()=>{
-   await home(page);await page.locator("[data-webgl=ready]").waitFor({timeout:45000});
-   await scrollAll(page); for (let project=0;project<5;project++) { await page.locator(".portfolio-pagination button").nth(project).click(); await page.waitForTimeout(400); } await page.locator(".portfolio-pagination button").first().click();
+   await home(page);await ready3d(page);
+   await scrollAll(page); for (let project=0;project<projects.length;project++) { await page.locator(".portfolio-pagination button").nth(project).click(); await page.waitForTimeout(400); } await page.locator(".portfolio-pagination button").first().click();
    const result=await overflow(page);assert(result.extra<=1,JSON.stringify(result));
-   assert(await page.locator(".case-study").count()===5,"portfolio count");
+   assert(await page.locator(".case-study").count()===projects.length,"portfolio count");
    assert(await page.locator(".case-screenshot").evaluateAll(images=>images.every(i=>i.complete&&i.naturalWidth>0)),"Screenshots failed");
    const tabs=page.getByRole("tab");
    for(let i=0;i<6;i++){await tabs.nth(i).click();assert(await tabs.nth(i).getAttribute("aria-selected")==="true","service not selected");assert(await page.locator(".capability-detail h3").textContent(),"missing detail");}
@@ -57,7 +61,7 @@ try{
    if(width===375||width===1440)await axe(page,width+" dark");
    await page.getByRole("button",{name:"Activar modo claro"}).click();await page.waitForTimeout(400);
    if(width===375||width===1440)await axe(page,width+" light");
-   return {webgl:"ready",images:5,services:6,themes:2,overflow:result.extra};
+   return {webgl:"ready",images:projects.length,services:6,themes:2,overflow:result.extra};
   });await context.close();
  }
  const {context,page}=await makePage();
@@ -92,12 +96,12 @@ try{
  });
  await check("3D pause and fallbacks",async()=>{
   await home(page);
-  await page.evaluate(()=>window.scrollTo({top:0,behavior:"instant"}));await page.locator("[data-webgl=ready]").waitFor({timeout:45000});
+  await page.evaluate(()=>window.scrollTo({top:0,behavior:"instant"}));await ready3d(page);
   await page.getByRole("button",{name:"Pausar movimiento"}).click();await page.getByRole("button",{name:"Activar movimiento"}).click();
   await home(page,"?webgl=off");assert(await page.locator("[data-webgl]").getAttribute("data-webgl")==="fallback","explicit fallback absent");
   assert(await page.getByRole("link",{name:"Hablemos de tu proyecto"}).isVisible(),"CTA blocked");
   const noGpu=await makePage(1440,900);await noGpu.page.addInitScript(()=>{const original=HTMLCanvasElement.prototype.getContext;HTMLCanvasElement.prototype.getContext=function(type,...args){return type==="webgl2"?null:original.call(this,type,...args);};});
-  await home(noGpu.page);assert(await noGpu.page.locator("[data-webgl]").getAttribute("data-webgl")==="fallback","unavailable WebGL fallback");await noGpu.context.close();
+  await home(noGpu.page);await noGpu.page.mouse.move(40,40);await noGpu.page.waitForTimeout(1500);assert(await noGpu.page.locator("[data-webgl]").getAttribute("data-webgl")==="fallback","unavailable WebGL fallback");await noGpu.context.close();
  });
  await check("natural scroll / bottom navigation / touch and keyboard",async()=>{
   await home(page);await page.mouse.wheel(0,850);await page.waitForTimeout(300);const down=await page.evaluate(()=>scrollY);assert(down>100,"wheel blocked");await page.mouse.wheel(0,-900);await page.waitForTimeout(300);assert(await page.evaluate(()=>scrollY)<down,"reverse wheel blocked");
@@ -108,17 +112,36 @@ try{
   await mobile.page.waitForTimeout(300);
   for(let i=0;i<12;i++){await mobile.page.keyboard.press('Tab');await mobile.page.waitForFunction(()=>document.querySelector('.nix-popup')?.contains(document.activeElement),{},{timeout:1000});}
   await mobile.page.getByRole('button',{name:'Cerrar chat',exact:true}).click();await mobile.page.getByRole('dialog').waitFor({state:'hidden'});assert(await mobile.page.locator('.bottom-nav button').evaluate(e=>e===document.activeElement),"mobile focus not returned");await mobile.context.close();
-  const staticPage=await makePage(1440,900,{javaScriptEnabled:false});await home(staticPage.page);assert(await staticPage.page.locator('.ecosystem-fallback').isVisible(),"no-JS fallback missing");await scrollAll(staticPage.page);assert(await staticPage.page.locator('.case-study').count()===5,"no-JS portfolio missing");await staticPage.context.close();
+  const staticPage=await makePage(1440,900,{javaScriptEnabled:false});await home(staticPage.page);assert(await staticPage.page.locator('.phone2d-shot').first().isVisible(),"no-JS fallback missing");assert(await staticPage.page.locator('.hero3d-project').count()===5,"no-JS projects list");await scrollAll(staticPage.page);assert(await staticPage.page.locator('.case-study').count()===projects.length,"no-JS portfolio missing");await staticPage.context.close();
  });
  await check("reduced motion / functional content",async()=>{
   await page.emulateMedia({reducedMotion:"reduce"});await home(page);await scrollAll(page);assert(!(await page.locator(".pin-spacer").count()),"Reduced motion pin");
   const tab=page.getByRole("tab",{name:/E-commerce/});await tab.click();assert(await tab.getAttribute("aria-selected")==="true","reduced service");
   assert(await page.locator(".preview-transition").evaluate(e=>getComputedStyle(e).transform==="none"||getComputedStyle(e).transform==="matrix(1, 0, 0, 1, 0, 0)"),"Reduced transform");
-  assert(await page.locator(".case-study").count()===5,"lost content");await page.emulateMedia({reducedMotion:"no-preference"});
+  assert(await page.locator(".case-study").count()===projects.length,"lost content");await page.emulateMedia({reducedMotion:"no-preference"});
  });
  for(const zoom of [1.25,1.5]){
-  await check("reflow zoom "+zoom,async()=>{await home(page);await page.evaluate(zoom=>document.documentElement.style.zoom=zoom,zoom);await scrollAll(page);assert((await overflow(page)).extra<=1,"zoom overflow");await page.screenshot({path:"qa-results/"+mode+"-zoom-"+zoom+".png"});await page.evaluate(()=>document.documentElement.style.removeProperty("zoom"));return "CSS zoom reflow equivalent";});
+  await check("reflow zoom "+zoom,async()=>{await home(page);await page.evaluate(zoom=>{document.documentElement.style.zoom=zoom;window.dispatchEvent(new Event("resize"));},zoom);await page.waitForTimeout(600);await scrollAll(page);assert((await overflow(page)).extra<=1,"zoom overflow");await page.screenshot({path:"qa-results/"+mode+"-zoom-"+zoom+".png"});await page.evaluate(()=>document.documentElement.style.removeProperty("zoom"));return "CSS zoom reflow equivalent";});
  }
+ await check("SEO: servicios, ciudades, casos, JSON-LD, sitemap",async()=>{
+  const {context,page}=await makePage(390,844);const sitemap=await (await page.request.get(origin+"/sitemap.xml")).text();
+  const paths=[...landings.map(l=>"/"+l.slug),"/portafolio",...projects.map(p=>"/portafolio/"+p.slug)];const titles=new Set();
+  for(const path of paths){
+   const r=await page.goto(origin+path,{waitUntil:"domcontentloaded",timeout:90000});assert(r?.status()===200,path+" "+r?.status());
+   assert(await page.locator("h1").count()===1,path+" h1");const title=await page.title();assert(!titles.has(title),"title duplicado "+title);titles.add(title);
+   assert((await page.locator('meta[name=description]').getAttribute("content"))?.length>50,path+" description");
+   assert(await page.locator('link[rel=canonical]').getAttribute("href")===("https://www.ingenixhub.com"+path),path+" canonical");
+   const ld=await page.locator('script[type="application/ld+json"]').allTextContents();assert(ld.length>=2,path+" json-ld");ld.forEach(t=>JSON.parse(t));
+   assert(sitemap.includes("https://www.ingenixhub.com"+path+"</loc>"),path+" sitemap");
+   assert(await page.locator("img").evaluateAll(images=>images.every(i=>i.hasAttribute("alt"))),path+" alt");
+  }
+  for(const l of landings){const og=await page.request.get(origin+"/"+l.slug+"/opengraph-image");assert(og.ok()&&og.headers()["content-type"].includes("image/png"),"og "+l.slug);}
+  for(const path of ["/paginas-web","/moroleon"]){await page.goto(origin+path,{waitUntil:"networkidle"});assert((await overflow(page)).extra<=1,path+" overflow");await axe(page,path+" mobile");}
+  await page.goto(origin+"/",{waitUntil:"domcontentloaded"});const ld=JSON.parse(await page.locator('script[type="application/ld+json"]').first().textContent());
+  assert(ld["@graph"].some(n=>n["@type"]==="ProfessionalService"&&n.address.addressLocality==="Moroleón"),"LocalBusiness");
+  assert(await page.locator('footer a[href="/moroleon"]').count()===1,"footer cities");assert((await page.request.get(origin+"/no-existe")).status()===404,"unknown slug");
+  await context.close();return {pages:paths.length};
+ });
  await check("Nix real Gemini request / session / multiline",async()=>{
   await home(page);await page.getByRole("button",{name:"Abrir chat con Nix"}).click();await page.getByRole("dialog").waitFor();
   const input=page.getByRole("textbox",{name:"Cuéntale tu proyecto a Nix"});

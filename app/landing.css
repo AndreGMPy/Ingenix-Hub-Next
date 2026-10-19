@@ -1,0 +1,78 @@
+/* Páginas de servicio, ciudad y caso de estudio. Mismos tokens y lenguaje editorial (líneas, índices mono), sin colecciones de cards. */
+.landing { padding-top:clamp(1.5rem,3vw,2.5rem); overflow-x:clip; }
+.landing-crumbs { display:flex; flex-wrap:wrap; align-items:center; gap:.5rem; font-size:.6875rem; letter-spacing:.06em; color:var(--muted); }
+.landing-crumbs a { min-height:44px; display:inline-flex; align-items:center; text-decoration:underline; text-decoration-color:var(--line); text-underline-offset:3px; }
+.landing-crumbs [aria-current] { color:var(--text); }
+.landing-hero { position:relative; padding-block:clamp(2rem,5vw,4.5rem) clamp(2.5rem,5vw,4rem); max-width:62rem; }
+.landing-hero::before { content:""; position:absolute; z-index:-1; inset:-20% -30% -10% 30%; background:radial-gradient(ellipse at 60% 40%,color-mix(in srgb,var(--accent) 12%,transparent),transparent 65%); pointer-events:none; }
+.landing-hero .eyebrow { font-size:.625rem; letter-spacing:.1em; }
+.landing h1 { font-size:clamp(2.4rem,5vw,4.25rem); font-weight:650; line-height:1.07; letter-spacing:-.05em; max-width:18ch; }
+.landing-hero .section-lead { margin-top:1.5rem; max-width:58ch; }
+.landing-actions { display:flex; flex-wrap:wrap; align-items:center; gap:.75rem 1.5rem; margin-top:1.75rem; }
+.landing-note { display:flex; align-items:center; gap:.5rem; margin-top:1rem; color:var(--muted); font-size:.875rem; }
+.landing-note a { color:var(--accent); text-decoration:underline; text-underline-offset:3px; }
+.landing-section { padding-block:clamp(2.5rem,5vw,4.5rem); border-top:1px solid var(--line); }
+.landing-heading { margin-bottom:2rem; }
+.landing-heading h2, .landing-split h2 { margin-top:.25rem; }
+.landing-split { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.2fr); gap:clamp(2rem,5vw,5rem); }
+.landing-split h2 { font-size:clamp(1.6rem,2.6vw,2.25rem); margin-bottom:1.5rem; }
+.landing-blocks { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 clamp(1.5rem,4vw,3.5rem); margin:0; padding:0; list-style:none; }
+.landing-split .landing-blocks { grid-template-columns:minmax(0,1fr); }
+.landing-blocks li { position:relative; padding-block:1.25rem; border-top:1px solid var(--line); min-width:0; }
+.landing-blocks li::before { content:""; position:absolute; top:-1px; left:0; width:32px; height:2px; background:var(--cyan); }
+.landing-blocks.is-numbered li { padding-left:3rem; }
+.landing-blocks .mono { position:absolute; left:0; top:1.45rem; font-size:.6875rem; color:var(--accent); font-weight:700; }
+.landing-blocks h3 { font-size:1.125rem; letter-spacing:-.02em; }
+.landing-blocks p, .case-text { margin-top:.4rem; color:var(--muted); max-width:62ch; }
+.case-text { font-size:1.0625rem; line-height:1.75; }
+.landing-list { margin:0; padding:0; list-style:none; display:grid; gap:.75rem; }
+.landing-list li { position:relative; padding-left:1.5rem; }
+.landing-list li::before { content:""; position:absolute; left:0; top:.65em; width:8px; height:8px; border-radius:50%; border:2px solid var(--cyan); }
+.landing-links { margin-top:1.5rem; color:var(--muted); font-size:.9375rem; }
+.landing-links a { color:var(--accent); text-decoration:underline; text-underline-offset:3px; display:inline-block; min-height:44px; line-height:44px; }
+.landing-projects { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:clamp(1.25rem,3vw,2.5rem); margin:0 0 1.5rem; padding:0; list-style:none; }
+.landing-project { display:flex; flex-direction:column; gap:.4rem; min-width:0; }
+.landing-project-media { display:block; overflow:hidden; border:1px solid var(--line); border-radius:var(--radius-md); background:var(--surface-2); aspect-ratio:16/9; margin-bottom:.5rem; }
+.landing-project-media img { width:100%; height:100%; object-fit:cover; object-position:top; }
+.landing-project .mono { font-size:.625rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); }
+.landing-project strong { font-size:1.25rem; letter-spacing:-.03em; }
+.landing-project-summary { color:var(--muted); font-size:.9375rem; }
+.landing-faq-list { display:grid; max-width:56rem; }
+.landing-faq-list details { border-top:1px solid var(--line); }
+.landing-faq-list details:last-child { border-bottom:1px solid var(--line); }
+.landing-faq-list summary { display:flex; align-items:center; justify-content:space-between; gap:1rem; min-height:56px; padding-block:1rem; cursor:pointer; list-style:none; font-weight:650; font-size:1.0625rem; }
+.landing-faq-list summary::-webkit-details-marker { display:none; }
+.landing-faq-list summary svg { flex-shrink:0; color:var(--accent); transition:transform var(--duration-fast) var(--ease-out); }
+.landing-faq-list details[open] summary svg { transform:rotate(45deg); }
+.landing-faq-list details p { padding-bottom:1.25rem; color:var(--muted); max-width:65ch; }
+.landing-explore { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:2rem; }
+.landing-explore ul { margin:.75rem 0 0; padding:0; list-style:none; display:flex; flex-wrap:wrap; gap:0 1.5rem; }
+.landing-explore a { display:inline-flex; align-items:center; gap:.35rem; min-height:44px; font-weight:600; text-decoration:underline; text-decoration-color:var(--line); text-underline-offset:4px; }
+.landing-nearby { padding-bottom:2rem; }
+.landing .process-section { border-top:1px solid var(--line); }
+/* Caso de estudio */
+.case-badge { display:inline-block; margin-bottom:1rem; padding:.3rem .6rem; border:1px solid var(--line); border-radius:var(--radius-sm); font-size:.6875rem; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
+.case-figure { margin-bottom:clamp(2rem,4vw,3.5rem); }
+.case-figure > .browser-chrome { border:1px solid var(--line); border-bottom:0; border-radius:var(--radius-md) var(--radius-md) 0 0; font-size:.625rem; }
+.case-figure img { display:block; width:100%; height:auto; border:1px solid var(--line); border-radius:0 0 var(--radius-md) var(--radius-md); }
+.landing-cta { text-align:center; display:grid; justify-items:center; }
+.landing-cta .landing-actions { justify-content:center; }
+.case-more { margin-top:.25rem; }
+/* Pie: ciudades */
+.footer-cities { display:flex; flex-wrap:wrap; align-items:center; gap:.25rem .5rem; padding-block:1rem; border-top:1px solid var(--line); font-size:.8125rem; color:var(--muted); }
+.footer-cities a { display:inline-flex; align-items:center; min-height:44px; color:var(--text); font-weight:600; }
+.footer-cities i { font-style:normal; margin-left:.5rem; }
+.footer-cities small { flex-basis:100%; font-size:.75rem; }
+@media (hover:hover) and (pointer:fine) { .landing-project:hover strong, .landing-explore a:hover, .footer-cities a:hover { color:var(--accent); } .landing-project-media img { transition:transform var(--duration-normal) var(--ease-out); } .landing-project:hover .landing-project-media img { transform:scale(1.02); } }
+@media (max-width:1023px) { .landing-projects { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media (max-width:767px) {
+  .landing-split, .landing-blocks, .landing-explore, .landing-projects { grid-template-columns:minmax(0,1fr); }
+  .landing h1 { font-size:clamp(2.1rem,9vw,2.9rem); }
+  .landing-actions .button { width:100%; }
+}
+@media (prefers-reduced-motion:reduce) { .landing-faq-list summary svg, .landing-project-media img { transition:none; } }
+.portfolio-full-list .case-title-row h2 { font-size:clamp(1.35rem,2vw,1.75rem); line-height:1.25; letter-spacing:-.025em; font-weight:650; }
+.case-page .landing-section h2 { font-size:clamp(1.6rem,2.6vw,2.25rem); margin-bottom:1.25rem; }
+/* Pie: el lanzador flotante de Nix (escritorio) no tapa la última fila. */
+@media (min-width:768px) { .site-footer { padding-bottom:6.5rem; } }
+@media (max-width:767px) { .footer-cities > span:first-child { flex-basis:100%; } }

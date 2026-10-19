@@ -7,3 +7,4 @@ qa-results/
 *.log
 
 .qa-v1/
+.vercel

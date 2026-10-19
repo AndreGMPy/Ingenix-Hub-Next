@@ -1,0 +1,113 @@
+/* Hero 3D — celular con proyectos reales. Reglas de movimiento: .claude/skills/ingenix-motion.
+   Base = versión estática completa (sin JS, reduced motion, teléfono horizontal). [data-motion=scroll] = pin + scrub. */
+.hero3d { position:relative; isolation:isolate; overflow:clip; padding-block:clamp(2rem,4vw,3.5rem) clamp(2.5rem,5vw,4rem); }
+.hero3d::before { content:""; position:absolute; z-index:-2; inset:0; pointer-events:none; background:radial-gradient(ellipse 50% 60% at 74% 46%,color-mix(in srgb,var(--accent) 15%,transparent),transparent 70%),radial-gradient(ellipse 40% 45% at 12% 80%,color-mix(in srgb,var(--cyan) 8%,transparent),transparent 70%); }
+.hero3d-glows { position:absolute; z-index:-1; inset:0; pointer-events:none; }
+.hero3d-glow { position:absolute; inset:0; opacity:0; background:radial-gradient(ellipse 46% 58% at 66% 52%,color-mix(in srgb,var(--glow) 30%,transparent),transparent 72%),radial-gradient(ellipse 30% 40% at 20% 50%,color-mix(in srgb,var(--glow) 12%,transparent),transparent 70%); }
+:root[data-theme="dark"] .hero3d-glow { background:radial-gradient(ellipse 46% 58% at 66% 52%,color-mix(in srgb,var(--glow) 34%,transparent),transparent 72%),radial-gradient(ellipse 30% 40% at 20% 50%,color-mix(in srgb,var(--glow) 14%,transparent),transparent 70%); }
+
+.hero3d-stage { position:relative; display:grid; grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr); grid-template-areas:"copy device" "projects device" "final final"; gap:2rem clamp(2rem,4vw,4rem); align-items:center; }
+.hero3d-copy { grid-area:copy; align-self:end; min-width:0; position:relative; z-index:2; }
+.hero3d .eyebrow { font-size:.625rem; letter-spacing:.08em; margin-bottom:1.25rem; }
+.hero3d h1 { font-size:clamp(2.8rem,5.2vw,4.75rem); font-weight:650; line-height:1.06; letter-spacing:-.055em; }
+.hero3d h1 span, .hero3d-final h2 span { background:linear-gradient(110deg,var(--accent),var(--cyan)); background-clip:text; -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.hero3d-description { max-width:40ch; margin-top:1.5rem; color:var(--muted); font-size:clamp(1rem,1.3vw,1.125rem); line-height:1.7; }
+.hero3d-actions { display:flex; flex-wrap:wrap; align-items:center; gap:.75rem 1.5rem; margin-top:1.75rem; }
+
+.hero3d-device { grid-area:device; position:relative; display:grid; place-items:center; min-height:min(68svh,600px); }
+.phone2d-layer { display:grid; place-items:center; transition:opacity var(--duration-normal) var(--ease-out); }
+/* Con el 3D listo, la capa 2D no se pinta ni se compone; sus <video> siguen reproduciéndose y alimentan la textura WebGL. */
+.phone2d-layer.is-hidden { opacity:0; visibility:hidden; pointer-events:none; }
+.hero3d-canvas { position:absolute; inset:0; z-index:1; opacity:0; transition:opacity var(--duration-slow) var(--ease-out); }
+.hero3d-canvas.is-ready { opacity:1; }
+.hero3d-canvas canvas { cursor:grab; }
+.hero3d-canvas canvas:active { cursor:grabbing; }
+.hero3d-pause { position:absolute; z-index:3; right:0; bottom:0; width:44px; height:44px; border:1px solid var(--line); border-radius:50%; background:color-mix(in srgb,var(--surface) 82%,transparent); color:var(--muted); display:grid; place-items:center; }
+
+/* Mockup 2D: misma proporción que la pantalla 3D (472×1024). */
+.phone2d { --h:min(64svh,560px); position:relative; height:var(--h); aspect-ratio:.486; transform-style:preserve-3d; }
+.phone2d-face { position:absolute; inset:0; border-radius:calc(var(--h) * .075); backface-visibility:hidden; -webkit-backface-visibility:hidden; }
+.phone2d-front { padding:calc(var(--h) * .02); background:linear-gradient(140deg,#3a5fa3,#1a3466 38%,#10233f 70%,#2c4f8f); box-shadow:inset 0 0 0 1px #ffffff2e,0 30px 70px -20px #0a1a3a80; }
+.phone2d-screen { position:relative; height:100%; overflow:hidden; border-radius:calc(var(--h) * .058); background:#05080f; }
+.phone2d-shot { position:absolute; inset:0; }
+.phone2d-shot > img, .phone2d-video { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:top; }
+.phone2d-video { opacity:0; transition:opacity var(--duration-normal) var(--ease-out); }
+.phone2d-video.is-playing { opacity:1; }
+.phone2d-shot:not([data-index="0"]) { opacity:0; }
+/* Capturas 2–5: lazy y fuera del render hasta la primera interacción, para no competir con el LCP. */
+.phone2d:not(.is-warm) .phone2d-shot:not([data-index="0"]) { display:none; }
+.phone2d-island { position:absolute; top:2.2%; left:50%; width:30%; height:3.6%; translate:-50% 0; border-radius:99px; background:#000; }
+.phone2d-back { transform:rotateY(180deg); background:linear-gradient(140deg,#2c4f8f,#1a3466 45%,#10233f); box-shadow:inset 0 0 0 1px #ffffff2e; }
+.phone2d-camera { position:absolute; top:5%; right:9%; width:40%; aspect-ratio:1; border-radius:22%; background:#2c4f8f; box-shadow:inset 0 0 0 1px #ffffff30; }
+
+.hero3d-projects { grid-area:projects; min-width:0; position:relative; z-index:2; }
+.hero3d-progress, .hero3d-hint { display:none; }
+.hero3d-list { display:flex; flex-wrap:wrap; gap:.5rem 1.5rem; margin:0; padding:0; list-style:none; }
+.hero3d-project { display:flex; flex-direction:column; gap:.1rem; padding-left:.75rem; border-left:2px solid var(--project); }
+.hero3d-project .mono { font-size:.625rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); }
+.hero3d-project strong { font-size:1rem; font-weight:650; letter-spacing:-.02em; }
+
+.hero3d-final { grid-area:final; position:relative; z-index:2; display:flex; flex-wrap:wrap; align-items:center; justify-content:flex-start; gap:1rem 2rem; padding-top:1.5rem; border-top:1px solid var(--line); }
+.hero3d-final h2 { font-size:clamp(1.6rem,2.6vw,2.25rem); }
+.hero3d-final-actions { display:flex; flex-wrap:wrap; gap:.75rem; }
+
+/* ---------- Scroll: pin + scrub (ScrollDirector pone data-motion; data-js evita salto de layout antes de GSAP) ---------- */
+@media (prefers-reduced-motion:no-preference) and (min-height:501px) {
+  [data-js] .hero3d { height:calc(100svh - var(--header-height)); min-height:520px; padding:0; }
+  [data-js] .hero3d-stage { display:block; height:100%; }
+  /* Centrado sin translate: GSAP es dueño del transform de los nodos que anima. */
+  [data-js] .hero3d-copy { position:absolute; z-index:2; left:0; top:0; bottom:0; height:fit-content; margin-block:auto; width:min(54%,640px); }
+  [data-js] .hero3d-device { position:absolute; z-index:1; inset:0 calc(50% - 50vw); min-height:0; display:block; }
+  [data-js] .phone2d-layer { position:absolute; inset:0; display:block; }
+  [data-js] .phone2d { --h:min(72svh,640px); position:absolute; left:50%; top:50%; margin:calc(var(--h) * -.5) 0 0 calc(var(--h) * -.243); will-change:transform; }
+  /* Sobre el lanzador de Nix (esquina inferior derecha). */
+  [data-js] .hero3d-pause { right:var(--gutter); bottom:6.5rem; }
+  [data-js] .hero3d-projects { position:absolute; z-index:2; left:0; top:0; bottom:0; width:min(48%,620px); display:flex; flex-direction:column; justify-content:center; gap:1.5rem; pointer-events:none; }
+  [data-js] .hero3d-progress { display:flex; align-items:center; gap:.5rem; font-size:.75rem; letter-spacing:.14em; color:var(--muted); }
+  [data-js] .hero3d-count { display:grid; color:var(--text); font-weight:700; }
+  [data-js] .hero3d-count>span { grid-area:1/1; }
+  [data-js] .hero3d-count>span:not([data-index="0"]), [data-js] .hero3d-project:not([data-index="0"]) { opacity:0; }
+  [data-js] .hero3d-list { display:grid; }
+  [data-js] .hero3d-project { grid-area:1/1; border:0; padding:0; gap:.75rem; }
+  [data-js] .hero3d-project .mono { font-size:.75rem; letter-spacing:.16em; color:var(--project); filter:saturate(1.1); }
+  [data-js] .hero3d-project strong { font-size:clamp(3rem,7.4vw,7rem); line-height:.95; letter-spacing:-.06em; font-weight:700; }
+  [data-js] .hero3d-hint { position:absolute; left:0; bottom:1.5rem; display:flex; align-items:center; gap:.75rem; font-size:.625rem; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); }
+  [data-js] .hero3d-hint>span { width:1px; height:28px; background:linear-gradient(var(--cyan),transparent); }
+  [data-js] .hero3d-final { position:absolute; z-index:2; left:0; right:0; bottom:clamp(1.5rem,5svh,3.5rem); flex-direction:column; justify-content:center; text-align:center; border:0; padding:0; gap:1.25rem; pointer-events:none; }
+  [data-js] .hero3d-final h2 { font-size:clamp(2rem,4vw,3.4rem); letter-spacing:-.045em; }
+  [data-js] .hero3d-final-actions { justify-content:center; pointer-events:auto; }
+  /* Capas propias sólo durante el pin: GSAP mueve transform/opacity sin repintar texto ni degradados grandes. */
+  [data-js] .hero3d[data-motion] :is(.hero3d-copy,.hero3d-project,.hero3d-count>span,.hero3d-progress,.hero3d-final) { will-change:transform,opacity; }
+  [data-js] .hero3d[data-motion] .hero3d-glow { will-change:opacity; }
+  /* Mientras el hero está fijado, el BottomNav (ya casi opaco) no desenfoca el canvas que cambia en cada cuadro. */
+  [data-hero-pinned] .bottom-nav { backdrop-filter:none; -webkit-backdrop-filter:none; background:color-mix(in srgb,var(--surface) 98%,transparent); }
+  /* Sin data-motion (GSAP aún no llega o falló) el primer cuadro sigue completo: oculta sólo lo que depende del scroll. */
+  [data-js] .hero3d:not([data-motion]) .hero3d-projects, [data-js] .hero3d:not([data-motion]) .hero3d-final { visibility:hidden; }
+  /* Misma pose que showcaseLayout().rest, en unidades de la capa (100vw × alto del hero), para que GSAP no produzca salto. */
+  [data-js] .hero3d:not([data-motion]) .phone2d { transform:perspective(1600px) translate(24vw,calc((100svh - var(--header-height)) * .04)) rotateY(-18deg); }
+}
+@media (prefers-reduced-motion:no-preference) and (min-height:501px) and (max-width:767px) {
+  [data-js] .hero3d { min-height:560px; }
+  [data-js] .hero3d-copy { top:1.25rem; bottom:auto; margin:0; width:100%; }
+  [data-js] .hero3d h1 { font-size:clamp(2.4rem,10.4vw,3.4rem); }
+  [data-js] .hero3d-description { margin-top:.9rem; font-size:.9375rem; }
+  [data-js] .hero3d-actions { margin-top:1.1rem; gap:.25rem 1.25rem; }
+  [data-js] .hero3d-actions .button { min-height:48px; }
+  [data-js] .hero3d-projects { top:1.25rem; bottom:auto; width:100%; gap:.75rem; }
+  [data-js] .hero3d-project strong { font-size:clamp(2.2rem,11vw,3.2rem); }
+  [data-js] .hero3d-hint { display:none; }
+  [data-js] .hero3d-final { bottom:calc(84px + env(safe-area-inset-bottom,0px)); gap:.9rem; }
+  [data-js] .hero3d-final h2 { font-size:clamp(1.7rem,8vw,2.3rem); }
+  [data-js] .hero3d-final-actions { flex-direction:column; align-items:stretch; width:100%; }
+  [data-js] .hero3d-pause { bottom:calc(84px + env(safe-area-inset-bottom,0px)); }
+  [data-js] .hero3d:not([data-motion]) .phone2d { transform:perspective(1600px) translate(0,calc((100svh - var(--header-height)) * .4)) rotateY(-7deg) scale(.56); }
+}
+
+@media (max-width:767px) {
+  .hero3d-stage { grid-template-columns:minmax(0,1fr); grid-template-areas:"copy" "device" "projects" "final"; gap:1.75rem; }
+  .hero3d-device { min-height:0; }
+  .phone2d { --h:min(58svh,460px); }
+  .hero3d-actions .button { width:100%; }
+}
+@media (prefers-reduced-motion:reduce) { .phone2d-layer, .hero3d-canvas { transition:none; } }
+@media (prefers-contrast:more) { .phone2d-front { box-shadow:inset 0 0 0 2px var(--line); } }

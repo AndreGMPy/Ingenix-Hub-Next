@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { motion } from "motion/react";
 import { ArrowUpRight, Check, ChevronRight } from "lucide-react";
 import { useRef, useState, type KeyboardEvent } from "react";
@@ -39,7 +40,7 @@ export function Capabilities({ items = capabilities }: { items?: readonly Capabi
     </div><div className="capability-panel" id={"panel-" + selected.id} role="tabpanel" aria-labelledby={"tab-" + selected.id} tabIndex={0}>
       <div className="preview-toolbar"><span className="mono">VISTA CONCEPTUAL</span><span className="preview-toolbar-label">{selected.name}<span className="status-dot" /></span></div>
       <div className="preview-stage" aria-hidden="true"><motion.div key={selected.id} className="preview-transition" initial={instant || reduced ? false : { opacity: 0, transform: "translateY(6px)" }} animate={{ opacity: 1, transform: "translateY(0px)" }} transition={{ duration: instant || reduced ? 0 : motionTokens.normal, ease: motionTokens.easeOut }}><CapabilityPreview id={selected.id} /></motion.div></div>
-      <div className="capability-detail"><h3>{selected.title}</h3><p>{selected.description}</p><ul>{selected.includes.map(item => <li key={item}><Check size={14} aria-hidden="true" />{item}</li>)}</ul><a href={site.whatsapp + "?text=" + encodeURIComponent("Hola, me interesa " + selected.name.toLowerCase() + " para mi negocio.")} target="_blank" rel="noopener noreferrer" className="text-link">Conversemos sobre tu proyecto<ArrowUpRight size={16} aria-hidden="true" /></a></div>
+      <div className="capability-detail"><h3>{selected.title}</h3><p>{selected.description}</p><ul>{selected.includes.map(item => <li key={item}><Check size={14} aria-hidden="true" />{item}</li>)}</ul><a href={site.whatsapp + "?text=" + encodeURIComponent("Hola, me interesa " + selected.name.toLowerCase() + " para mi negocio.")} target="_blank" rel="noopener noreferrer" className="text-link">Conversemos sobre tu proyecto<ArrowUpRight size={16} aria-hidden="true" /></a><Link href={selected.href} className="text-link">Más sobre {selected.name.toLowerCase()}<ChevronRight size={16} aria-hidden="true" /></Link></div>
     </div></div> : <p className="empty-state">Cuéntanos qué necesitas y definimos la solución contigo.</p>}
   </section>;
 }

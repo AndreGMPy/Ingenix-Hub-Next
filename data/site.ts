@@ -8,20 +8,36 @@ export const site = {
   quote: "https://wa.me/524932636339?text=Hola%2C%20quiero%20cotizar%20un%20proyecto%20con%20Ingenix%20Hub.",
   instagram: "https://www.instagram.com/ingenixhub",
   facebook: "https://www.facebook.com/share/18E1AF8CoZ/",
+  logo: "https://www.ingenixhub.com/brand/logo.png",
 } as const;
+
+/* Zona de servicio: una sola fuente para metadatos, JSON-LD, páginas de ciudad y pie de página. */
+export type CitySlug = "moroleon" | "uriangato" | "salamanca" | "irapuato";
+export const zone = {
+  base: { city: "Moroleón", region: "Guanajuato", country: "MX" },
+  primary: [
+    { slug: "moroleon", name: "Moroleón" }, { slug: "uriangato", name: "Uriangato" },
+    { slug: "salamanca", name: "Salamanca" }, { slug: "irapuato", name: "Irapuato" },
+  ] as const satisfies readonly { slug: CitySlug; name: string }[],
+  extended: ["Yuriria", "Valle de Santiago", "Celaya"] as const,
+  /** Frase corta para títulos: "en Moroleón y Guanajuato". */
+  label: "Moroleón y Guanajuato",
+  online: "Proyectos en línea para todo México",
+} as const;
+export const allCities = [...zone.primary.map(city => city.name), ...zone.extended];
 
 export type CapabilityId = "web" | "commerce" | "systems" | "apps" | "automation" | "ai";
 export type Capability = {
-  id: CapabilityId; number: string; name: string; short: string;
+  id: CapabilityId; number: string; name: string; short: string; href: string;
   title: string; description: string; includes: readonly string[];
 };
 export const capabilities: readonly Capability[] = [
-  { id: "web", number: "01", name: "Páginas web", short: "Tu primera impresión, bien hecha.", title: "Una web a la altura de tu negocio.", description: "Presenta lo que haces con claridad. Una página rápida, diseñada para tu marca y para las personas que la visitan.", includes: ["Diseño a medida", "Contacto directo", "SEO y rendimiento"] },
-  { id: "commerce", number: "02", name: "E-commerce", short: "Del catálogo al pedido.", title: "Tu tienda, abierta y conectada.", description: "Catálogos digitales y tiendas en línea con productos, carrito, pagos y un panel para administrar la operación.", includes: ["Catálogo y búsqueda", "Carrito y pagos", "Gestión de pedidos"] },
-  { id: "systems", number: "03", name: "Sistemas web", short: "Menos hojas sueltas. Más control.", title: "Software para tu forma de trabajar.", description: "Centraliza productos, clientes, pedidos o información en un sistema que responda a tus procesos.", includes: ["Paneles administrativos", "Roles y permisos", "Bases de datos"] },
-  { id: "apps", number: "04", name: "Apps web / PWA", short: "Tu herramienta, donde la necesitas.", title: "La experiencia de una app. En la web.", description: "Aplicaciones que funcionan desde el navegador y pueden instalarse en el teléfono. Acceso rápido para tu equipo o tus clientes.", includes: ["Experiencia móvil", "Instalación PWA", "Funciones a medida"] },
-  { id: "automation", number: "05", name: "Automatización", short: "Conecta lo que hoy haces a mano.", title: "Que los procesos sigan su curso.", description: "Conectamos formularios, pedidos, notificaciones y herramientas para reducir tareas repetitivas, según las integraciones disponibles.", includes: ["Flujos de trabajo", "Integración de herramientas", "Notificaciones"] },
-  { id: "ai", number: "06", name: "Inteligencia artificial", short: "IA con una tarea concreta.", title: "Una nueva forma de atender y operar.", description: "Asistentes y herramientas de IA que ayudan a entender consultas, organizar información y orientar a las personas.", includes: ["Asistentes virtuales", "Análisis de información", "Flujos con IA"] },
+  { id: "web", href: "/paginas-web", number: "01", name: "Páginas web", short: "Tu primera impresión, bien hecha.", title: "Una web a la altura de tu negocio.", description: "Presenta lo que haces con claridad. Una página rápida, diseñada para tu marca y para las personas que la visitan.", includes: ["Diseño a medida", "Contacto directo", "SEO y rendimiento"] },
+  { id: "commerce", href: "/tiendas-en-linea", number: "02", name: "E-commerce", short: "Del catálogo al pedido.", title: "Tu tienda, abierta y conectada.", description: "Catálogos digitales y tiendas en línea con productos, carrito, pagos y un panel para administrar la operación.", includes: ["Catálogo y búsqueda", "Carrito y pagos", "Gestión de pedidos"] },
+  { id: "systems", href: "/sistemas-web", number: "03", name: "Sistemas web", short: "Menos hojas sueltas. Más control.", title: "Software para tu forma de trabajar.", description: "Centraliza productos, clientes, pedidos o información en un sistema que responda a tus procesos.", includes: ["Paneles administrativos", "Roles y permisos", "Bases de datos"] },
+  { id: "apps", href: "/apps-pwa", number: "04", name: "Apps web / PWA", short: "Tu herramienta, donde la necesitas.", title: "La experiencia de una app. En la web.", description: "Aplicaciones que funcionan desde el navegador y pueden instalarse en el teléfono. Acceso rápido para tu equipo o tus clientes.", includes: ["Experiencia móvil", "Instalación PWA", "Funciones a medida"] },
+  { id: "automation", href: "/automatizacion", number: "05", name: "Automatización", short: "Conecta lo que hoy haces a mano.", title: "Que los procesos sigan su curso.", description: "Conectamos formularios, pedidos, notificaciones y herramientas para reducir tareas repetitivas, según las integraciones disponibles.", includes: ["Flujos de trabajo", "Integración de herramientas", "Notificaciones"] },
+  { id: "ai", href: "/inteligencia-artificial", number: "06", name: "Inteligencia artificial", short: "IA con una tarea concreta.", title: "Una nueva forma de atender y operar.", description: "Asistentes y herramientas de IA que ayudan a entender consultas, organizar información y orientar a las personas.", includes: ["Asistentes virtuales", "Análisis de información", "Flujos con IA"] },
 ];
 
 export const architecture = [

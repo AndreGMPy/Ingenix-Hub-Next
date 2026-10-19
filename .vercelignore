@@ -1,0 +1,9 @@
+.env*
+!.env.example
+qa-results
+.qa-v1
+.next
+node_modules
+public/historia
+plans
+*.tsbuildinfo
