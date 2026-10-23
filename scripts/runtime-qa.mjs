@@ -58,11 +58,11 @@ try{
    report.viewports.push({width,height,theme:"light",status:"PASS",webgl:await page.locator("[data-webgl]").getAttribute("data-webgl"),overflow:result.extra});
    await page.getByRole("button",{name:"Activar modo oscuro"}).click();
    assert(await page.locator("html").getAttribute("data-theme")==="dark","theme dark");
-   await page.waitForTimeout(400);assert((await overflow(page)).extra<=1,"dark overflow");
+   await page.waitForTimeout(1000);assert((await overflow(page)).extra<=1,"dark overflow");
    await page.screenshot({path:"qa-results/"+mode+"-"+width+"-dark.png"});
    report.viewports.push({width,height,theme:"dark",status:"PASS",overflow:0});
    if(width===375||width===1440)await axe(page,width+" dark");
-   await page.getByRole("button",{name:"Activar modo claro"}).click();await page.waitForTimeout(400);
+   await page.getByRole("button",{name:"Activar modo claro"}).click();await page.waitForTimeout(1000);
    if(width===375||width===1440)await axe(page,width+" light");
    return {webgl:"ready",images:projects.length,services:6,themes:2,overflow:result.extra};
   });await context.close();
